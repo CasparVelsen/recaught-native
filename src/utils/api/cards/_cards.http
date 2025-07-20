@@ -1,0 +1,23 @@
+@baseUrl =  http://localhost:3000/api
+
+GET {{baseUrl}}/cards
+
+###
+
+POST {{baseUrl}}/cards
+Content-Type: application/json
+
+{
+    "water": "Großensee",
+    "date": "2021-09-15",
+    "target": "Barsch"
+}
+
+### DELETE
+
+DELETE {{baseUrl}}/cards
+Content-Type: application/json
+
+{
+    "_id": "624fff57b5d3965223468b12"
+}

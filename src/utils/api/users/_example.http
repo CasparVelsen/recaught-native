@@ -1,0 +1,16 @@
+@baseUrl =  http://localhost:3000/api
+
+### Login with name and password
+
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "username": "Caspar_Velsen",
+    "password": "crvelsen23"
+}
+
+### Get profile via acces token
+
+GET {{baseUrl}}/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MjU1OWI5YTFhMWI5NzZkMzYyZmY0NWYiLCJpYXQiOjE2NDk3NzkwNjR9.aOIOhqr_5_JB8bgKHk6bnh7PwOmylHuSvZCDAZC4aDw
