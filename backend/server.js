@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 
-import cardsHandler from "../src/utils/api/cards/index.js";
-import usersHandler from "../src/utils/api/users/index.js";
-import profileHandler from "../src/utils/api/users/profile.js"; // ✅ wichtig!
+import cardsHandler from "./api/cards/index.js";
+import usersHandler from "./api/users/index.js";
+import profileHandler from "./api/users/profile.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
