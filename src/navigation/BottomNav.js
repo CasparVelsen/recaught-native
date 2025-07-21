@@ -5,13 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../assets/colors/Colors";
 
 // Screens
-import HomePage from "../screens/HomePage";
-import FormPage from "../screens/FormPage";
-import ProfilePage from "../screens/ProfilePage";
+import HomeScreen from "../screens/HomeScreen";
+import FormScreen from "../screens/FormScreen";
+import StatisticsScreen from "../screens/StatisticsScreen";
 
 const Tab = createBottomTabNavigator();
 
-const BottomNav = ({ token }) => {
+const BottomNav = ({ token, cards, profile }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -51,18 +51,23 @@ const BottomNav = ({ token }) => {
         tabBarInactiveTintColor: Colors.gray,
       })}
     >
-      <Tab.Screen name="Home">{() => <HomePage profile="test" />}</Tab.Screen>
-
+      <Tab.Screen name="Home">
+        {() => <HomeScreen token={token} profile={profile} cards={cards} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Form"
-        component={FormPage}
         options={{
-          tabBarButton: (props) => <CustomTabBarButton {...props} />,
+          tabBarButton: (props) => (
+            <CustomTabBarButton {...props} cards={cards} profile={profile} />
+          ),
         }}
-      />
-
+      >
+        {() => <FormScreen token={token} profile={profile} cards={cards} />}
+      </Tab.Screen>
       <Tab.Screen name="Statistics">
-        {() => <ProfilePage token={token} profile="test" />}
+        {() => (
+          <StatisticsScreen token={token} profile={profile} cards={cards} />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
   );

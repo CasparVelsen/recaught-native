@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const FormPage = () => {
+const StatisticsScreen = () => {
   return (
     <View>
-      <Text>FormPage</Text>
+      <Text>StatisticsScreen</Text>
     </View>
   );
 };
 
-export default FormPage;
+export default StatisticsScreen;
 
 const styles = StyleSheet.create({});

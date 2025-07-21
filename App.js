@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import LoginPage from "./src/screens/LoginPage";
-import SignupPage from "./src/screens/SignupPage";
+import LoginScreen from "./src/screens/LoginScreen";
+import SignupScreen from "./src/screens/SignupScreen";
 import BottomNav from "./src/navigation/BottomNav";
 
 const Stack = createNativeStackNavigator();
@@ -16,6 +16,7 @@ export default function App() {
   const [cards, setCards] = useState([]);
 
   const handleLogin = async (credentials) => {
+    console.log(credentials);
     try {
       const response = await fetch(`${API_BASE_URL}/api/users/login`, {
         method: "POST",
@@ -88,15 +89,15 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         {token ? (
-          <Stack.Screen name="HomeTabs" options={{ headerShown: false }}>
+          <Stack.Screen name="HomeTabs">
             {() => <BottomNav token={token} profile={profile} cards={cards} />}
           </Stack.Screen>
         ) : (
           <>
             <Stack.Screen name="Login">
-              {() => <LoginPage onLogin={handleLogin} />}
+              {() => <LoginScreen onLogin={handleLogin} />}
             </Stack.Screen>
-            <Stack.Screen name="Signup" component={SignupPage} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
           </>
         )}
       </Stack.Navigator>

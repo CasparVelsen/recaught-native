@@ -9,16 +9,19 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import Colors from "../../assets/colors/Colors";
 
 const initialCredentials = {
   username: "",
   password: "",
 };
 
-export default function LoginPage({ onLogin }) {
+export default function LoginScreen({ onLogin }) {
   const [credentials, setCredentials] = useState(initialCredentials);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+
+  console.log(credentials);
 
   const handleOnChange = (name, value) => {
     setCredentials((prev) => ({
@@ -106,30 +109,26 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     paddingBottom: 100,
-    backgroundColor: "#FFFCF8",
+    backgroundColor: Colors.white,
     flexGrow: 1,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#A2C36C",
+    color: Colors.primary,
   },
   subtitle: {
     fontSize: 18,
-    color: "#A2C36C",
+    color: Colors.secondary,
     marginTop: 10,
   },
   form: {
     marginTop: 20,
     borderWidth: 0.5,
-    borderColor: "#A2C36C",
+    borderColor: Colors.secondary,
     borderRadius: 10,
     padding: 16,
-    backgroundColor: "#FFFCF8",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Colors.background,
   },
   inputGroup: {
     marginBottom: 20,
@@ -137,31 +136,31 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     marginBottom: 5,
-    color: "#333",
+    color: Colors.primary,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#FF9C27",
+    borderColor: Colors.secondary,
+    color: Colors.primary,
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
-    color: "#333",
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
   },
   buttonContainer: {
     alignItems: "flex-end",
   },
   loginButton: {
-    backgroundColor: "#A2C36C",
+    backgroundColor: Colors.secondary,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 6,
   },
   disabledButton: {
-    backgroundColor: "#ccc",
+    backgroundColor: Colors.gray,
   },
   loginText: {
-    color: "#fff",
+    color: Colors.white,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -170,18 +169,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signUpText: {
-    color: "#A2C36C",
+    color: Colors.secondary,
     fontSize: 16,
   },
   signUpButton: {
     marginTop: 10,
-    backgroundColor: "#FF9C27",
+    backgroundColor: Colors.accent,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
   signUpButtonText: {
-    color: "white",
+    color: Colors.white,
     fontWeight: "bold",
   },
 });
