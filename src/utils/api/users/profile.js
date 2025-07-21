@@ -1,29 +1,29 @@
-import jwt from 'jsonwebtoken';
-import dbConnect from '../../lib/dbConnect';
-import User from '../../models/User';
+import jwt from "jsonwebtoken";
+import dbConnect from "../../lib/dbConnect.js";
+import User from "../../models/User.js";
 
 const { JWT_SECRET } = process.env;
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET not set');
+  throw new Error("JWT_SECRET not set");
 }
 
 const profileHandler = async (request, response) => {
   const { method } = request;
 
-  if (method !== 'GET') {
+  if (method !== "GET") {
     return response
       .status(405)
-      .json({ code: 405, message: 'Method not allowed' });
+      .json({ code: 405, message: "Method not allowed" });
   }
 
   const authorizationHeader = request.headers.authorization;
 
   if (!authorizationHeader) {
-    return response.status(401).json({ code: 401, message: 'Unauthorized' });
+    return response.status(401).json({ code: 401, message: "Unauthorized" });
   }
 
-  const token = authorizationHeader.replace('Bearer', '').trim();
+  const token = authorizationHeader.replace("Bearer", "").trim();
 
   const claims = jwt.verify(token, JWT_SECRET);
 

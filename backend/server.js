@@ -1,11 +1,9 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env" });
-
 import express from "express";
 import cors from "cors";
 
 import cardsHandler from "../src/utils/api/cards/index.js";
 import usersHandler from "../src/utils/api/users/index.js";
+import profileHandler from "../src/utils/api/users/profile.js"; // ✅ wichtig!
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,20 +12,32 @@ app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/cards", async (req, res) => {
+// ⬇️ Registrierung der spezifischen Route zuerst
+app.use("/api/users/profile", async (req, res) => {
   try {
-    await cardsHandler(req, res);
+    await profileHandler(req, res);
   } catch (err) {
-    console.error(err);
+    console.error("Fehler in /profile:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// ⬇️ Dann allgemeine User-Routen
 app.use("/api/users", async (req, res) => {
   try {
     await usersHandler(req, res);
   } catch (err) {
-    console.error(err);
+    console.error("Fehler in /users:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Kartenrouten
+app.use("/api/cards", async (req, res) => {
+  try {
+    await cardsHandler(req, res);
+  } catch (err) {
+    console.error("Fehler in /cards:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -37,5 +47,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`✅ Server läuft auf Port ${PORT}`);
 });

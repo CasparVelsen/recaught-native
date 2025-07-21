@@ -12,7 +12,7 @@ const API_BASE_URL = "http://10.116.131.241:3000";
 
 export default function App() {
   const [token, setToken] = useState(null);
-  const [profile, setProfile] = useState();
+  const [profile, setProfile] = useState(null);
   const [cards, setCards] = useState([]);
 
   const handleLogin = async (credentials) => {
@@ -26,15 +26,12 @@ export default function App() {
       });
 
       const data = await response.json();
-      console.log("Status:", response.status);
-      console.log("Login response data:", data);
 
-      if (!response.ok) {
+      if (!response.ok || !data.token) {
         throw new Error(data.message || "Login fehlgeschlagen");
       }
 
       setToken(data.token);
-      console.log("Token gesetzt:", data.token);
     } catch (error) {
       console.error("Login error:", error.message);
       throw error;
@@ -54,7 +51,8 @@ export default function App() {
         });
 
         const profileData = await profileRes.json();
-        if (!profileRes.ok) {
+
+        if (!profileRes.ok || !profileData._id) {
           console.error("Fehler beim Laden des Profils:", profileData);
           return;
         }
@@ -62,8 +60,14 @@ export default function App() {
         setProfile(profileData);
 
         const cardsRes = await fetch(
-          `${API_BASE_URL}/api/cards?author=${profileData._id}`
+          `${API_BASE_URL}/api/cards?author=${profileData._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
         const cardsData = await cardsRes.json();
 
         if (!cardsRes.ok) {
@@ -85,7 +89,7 @@ export default function App() {
       <Stack.Navigator>
         {token ? (
           <Stack.Screen name="HomeTabs" options={{ headerShown: false }}>
-            {() => <BottomNav token={token} />}
+            {() => <BottomNav token={token} profile={profile} cards={cards} />}
           </Stack.Screen>
         ) : (
           <>
