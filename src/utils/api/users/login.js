@@ -1,51 +1,36 @@
-import dbConnect from "../../lib/dbConnect";
-import User from "../../models/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dbConnect from "../../lib/dbConnect.js";
+import User from "../../models/User.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const { JWT_SECRET } = process.env;
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET not set");
-}
+if (!JWT_SECRET) throw new Error("JWT_SECRET not set");
 
-const loginHandler = async (request, response) => {
-  const { method } = request;
-
-  if (method !== "POST") {
-    return response
-      .status(405)
-      .json({ code: 405, message: "Method not allowed" });
+const loginHandler = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { username, password } = request.body;
-
-  if (!(username && password)) {
-    return response
-      .status(404)
-      .json({ code: 404, message: "Name and password required" });
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password required" });
   }
 
   await dbConnect();
-  console.log("Connected to DB");
 
-  const foundUser = await User.findOne({ username });
-
-  console.log(foundUser);
-
+  const foundUser = await User.findOne({ username: username.trim() });
   if (!foundUser) {
-    return response.status(404).json({ code: 401, message: "Unauthorized" });
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  const isPasswordMatch = await bcrypt.compare(password, foundUser.password);
-
-  if (!isPasswordMatch) {
-    return response.status(401).json({ code: 401, message: "Unauthorized" });
+  const isMatch = await bcrypt.compare(password, foundUser.password);
+  if (!isMatch) {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
   const token = jwt.sign({ sub: foundUser._id }, JWT_SECRET);
-
-  response.status(200).json({ token });
+  return res.status(200).json({ token }); // << HIER wichtig!
 };
 
 export default loginHandler;

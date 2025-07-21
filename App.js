@@ -25,15 +25,16 @@ export default function App() {
         body: JSON.stringify(credentials),
       });
 
-      console.log(response);
-
       const data = await response.json();
+      console.log("Status:", response.status);
+      console.log("Login response data:", data);
 
       if (!response.ok) {
         throw new Error(data.message || "Login fehlgeschlagen");
       }
 
       setToken(data.token);
+      console.log("Token gesetzt:", data.token);
     } catch (error) {
       console.error("Login error:", error.message);
       throw error;

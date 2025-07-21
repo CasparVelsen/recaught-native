@@ -1,10 +1,15 @@
 import dbConnect from "../../lib/dbConnect.js";
 import User from "../../models/User.js";
 import bcrypt from "bcrypt";
+import loginHandler from "./login.js";
 
 async function handler(request, response) {
   await dbConnect();
   console.log("Connected to DB");
+
+  if (request.url === "/login") {
+    return loginHandler(request, response); // <-- Login auslagern
+  }
 
   if (request.method === "GET") {
     const users = await User.find();
@@ -12,6 +17,7 @@ async function handler(request, response) {
   }
 
   if (request.method === "POST") {
+    // Registrierung
     const { username, password, firstname, lastname } = request.body;
     const hashedPassword = bcrypt.hashSync(password, 12);
     const result = await User.create({
@@ -20,9 +26,10 @@ async function handler(request, response) {
       firstname,
       lastname,
     });
-    response.json(result);
-    return;
+    return response.status(201).json(result);
   }
+
+  return response.status(405).json({ message: "Method not allowed" });
 }
 
 export default handler;
