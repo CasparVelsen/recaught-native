@@ -305,11 +305,12 @@ const styles = StyleSheet.create({
   catchLength: {
     color: Colors.accent,
     ...Typography.body,
-    width: "30%",
   },
   catchStatus: {
     ...Typography.caption,
     color: Colors.gray,
+    width: "30%",
+    textAlign: "right",
   },
   noCatches: {
     fontStyle: "italic",
