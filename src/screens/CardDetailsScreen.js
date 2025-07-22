@@ -70,37 +70,47 @@ const CardDetailsScreen = ({ route, navigation }) => {
       >
         {/* Wetter & Wasser-Tiles */}
         <View style={styles.tilesContainer}>
-          <View style={styles.tileGroup}>
-            <Text style={styles.tileGroupTitle}>Gewässerdaten</Text>
-            <View style={styles.tilesRow}>
-              {renderTile(
-                "Wassertemp.",
-                card.watertemp && `${card.watertemp} °C`
-              )}
-              {renderTile("Wasserfarbe", card.watercolor, "watercolor")}
-              {renderTile("Wasserstand", card.waterlevel, "waterlevel")}
+          {(card.watertemp || card.watercolor || card.waterlevel) && (
+            <View style={styles.tileGroup}>
+              <Text style={styles.tileGroupTitle}>Gewässerdaten</Text>
+              <View style={styles.tilesRow}>
+                {card.watertemp &&
+                  renderTile("Wassertemp.", `${card.watertemp} °C`)}
+                {card.watercolor &&
+                  renderTile("Wasserfarbe", card.watercolor, "watercolor")}
+                {card.waterlevel &&
+                  renderTile("Wasserstand", card.waterlevel, "waterlevel")}
+              </View>
             </View>
-          </View>
-          <View style={styles.tileGroup}>
-            <Text style={styles.tileGroupTitle}>Wetterdaten</Text>
-            <View style={styles.tilesRow}>
-              {renderTile("Wetter", card.weather, "weather")}
-              {renderTile(
-                "Luftdruck",
-                card.airpressure && `${card.airpressure} hPa`
-              )}
-              {renderTile(
-                "Temperatur",
-                card.temperature && `${card.temperature} °C`
-              )}
-              {renderTile("Mondphase", card.moon, "moon")}
-              {renderTile("Windrichtung", card.wind, "wind")}
-              {renderTile(
-                "Windgeschw.",
-                card.windspeed && `${card.windspeed} km/h`
-              )}
+          )}
+
+          {(card.weather ||
+            card.airpressure ||
+            card.temperature ||
+            card.moon ||
+            card.wind ||
+            card.windspeed) && (
+            <View style={styles.tileGroup}>
+              <Text style={styles.tileGroupTitle}>Wetterdaten</Text>
+              <View style={styles.tilesRow}>
+                {renderTile("Wetter", card.weather, "weather")}
+                {renderTile(
+                  "Luftdruck",
+                  card.airpressure && `${card.airpressure} hPa`
+                )}
+                {renderTile(
+                  "Temperatur",
+                  card.temperature && `${card.temperature} °C`
+                )}
+                {renderTile("Mondphase", card.moon, "moon")}
+                {renderTile("Windrichtung", card.wind, "wind")}
+                {renderTile(
+                  "Windgeschw.",
+                  card.windspeed && `${card.windspeed} km/h`
+                )}
+              </View>
             </View>
-          </View>
+          )}
         </View>
 
         {/* Fänge */}
@@ -142,7 +152,7 @@ const CardDetailsScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             ))
           ) : (
-            <Text style={styles.noCatches}>Keine Fänge</Text>
+            <></>
           )}
           <Field label="gefangen" value={card.catches.length} />
           <Field label="verloren" value={card.lost} />
@@ -229,7 +239,6 @@ const styles = StyleSheet.create({
   tilesRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
   },
   tile: {
     width: "30%",
