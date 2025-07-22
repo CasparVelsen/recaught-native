@@ -8,7 +8,7 @@ async function handler(request, response) {
   console.log("Connected to DB");
 
   if (request.url === "/login") {
-    return loginHandler(request, response); // <-- Login auslagern
+    return loginHandler(request, response);
   }
 
   if (request.method === "GET") {
@@ -17,7 +17,6 @@ async function handler(request, response) {
   }
 
   if (request.method === "POST") {
-    // Registrierung
     const { username, password, firstname, lastname } = request.body;
     const hashedPassword = bcrypt.hashSync(password, 12);
     const result = await User.create({

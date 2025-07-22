@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  SafeAreaView,
   StyleSheet,
   ScrollView,
   Alert,
@@ -11,29 +12,38 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 
-const initialCredentials = {
-  username: "",
-  password: "",
-};
+const API_BASE_URL = "http://10.116.131.241:3000";
 
-export default function LoginScreen({ onLogin }) {
-  const [credentials, setCredentials] = useState(initialCredentials);
+export default function LoginScreen({ onLoginSuccess }) {
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  console.log(credentials);
-
   const handleOnChange = (name, value) => {
-    setCredentials((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await onLogin(credentials);
+      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.token) {
+        throw new Error(data.message || "Login fehlgeschlagen");
+      }
+
+      onLoginSuccess(data.token);
     } catch (error) {
       Alert.alert(
         "Login fehlgeschlagen",
@@ -48,64 +58,70 @@ export default function LoginScreen({ onLogin }) {
     credentials.username.trim() === "" || credentials.password.trim() === "";
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>
-        You have to login first to see your data
-      </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Login</Text>
+        <Text style={styles.subtitle}>
+          You have to login first to see your data
+        </Text>
 
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Your user name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your user name"
-            onChangeText={(value) => handleOnChange("username", value)}
-            value={credentials.username}
-            autoCapitalize="none"
-          />
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Your user name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your user name"
+              onChangeText={(value) => handleOnChange("username", value)}
+              value={credentials.username}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              secureTextEntry
+              onChangeText={(value) => handleOnChange("password", value)}
+              value={credentials.password}
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                (disabled || loading) && styles.disabledButton,
+              ]}
+              onPress={handleSubmit}
+              disabled={disabled || loading}
+            >
+              <Text style={styles.loginText}>
+                {loading ? "Logging in..." : "Login"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            secureTextEntry
-            onChangeText={(value) => handleOnChange("password", value)}
-            value={credentials.password}
-          />
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              (disabled || loading) && styles.disabledButton,
-            ]}
-            onPress={handleSubmit}
-            disabled={disabled || loading}
-          >
-            <Text style={styles.loginText}>
-              {loading ? "Logging in..." : "Login"}
-            </Text>
+        <View style={styles.signUp}>
+          <Text style={styles.signUpText}>You don't have an account yet?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+            <View style={styles.signUpButton}>
+              <Text style={styles.signUpButtonText}>Sign up now</Text>
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
-
-      <View style={styles.signUp}>
-        <Text style={styles.signUpText}>You don't have an account yet?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <View style={styles.signUpButton}>
-            <Text style={styles.signUpButtonText}>Sign up now</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     padding: 16,
     paddingBottom: 100,

@@ -7,7 +7,6 @@ import SignupScreen from "./src/screens/SignupScreen";
 import BottomNav from "./src/navigation/BottomNav";
 
 const Stack = createNativeStackNavigator();
-
 const API_BASE_URL = "http://10.116.131.241:3000";
 
 export default function App() {
@@ -15,44 +14,18 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [cards, setCards] = useState([]);
 
-  const handleLogin = async (credentials) => {
-    console.log(credentials);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.token) {
-        throw new Error(data.message || "Login fehlgeschlagen");
-      }
-
-      setToken(data.token);
-    } catch (error) {
-      console.error("Login error:", error.message);
-      throw error;
-    }
-  };
-
   useEffect(() => {
     if (!token) return;
 
-    const fetchProfileAndCards = async () => {
+    const loadUserData = async () => {
       try {
+        // 1. Profil laden
         const profileRes = await fetch(`${API_BASE_URL}/api/users/profile`, {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const profileData = await profileRes.json();
-
         if (!profileRes.ok || !profileData._id) {
           console.error("Fehler beim Laden des Profils:", profileData);
           return;
@@ -60,17 +33,12 @@ export default function App() {
 
         setProfile(profileData);
 
-        const cardsRes = await fetch(
-          `${API_BASE_URL}/api/cards?author=${profileData._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        // 2. Karten des Users laden (über Token autorisiert)
+        const cardsRes = await fetch(`${API_BASE_URL}/api/cards`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const cardsData = await cardsRes.json();
-
         if (!cardsRes.ok) {
           console.error("Fehler beim Laden der Karten:", cardsData);
           return;
@@ -82,12 +50,12 @@ export default function App() {
       }
     };
 
-    fetchProfileAndCards();
+    loadUserData();
   }, [token]);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
           <Stack.Screen name="HomeTabs">
             {() => <BottomNav token={token} profile={profile} cards={cards} />}
@@ -95,9 +63,11 @@ export default function App() {
         ) : (
           <>
             <Stack.Screen name="Login">
-              {() => <LoginScreen onLogin={handleLogin} />}
+              {() => <LoginScreen onLoginSuccess={setToken} />}
             </Stack.Screen>
-            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Signup">
+              {() => <SignupScreen onLoginSuccess={setToken} />}
+            </Stack.Screen>
           </>
         )}
       </Stack.Navigator>
