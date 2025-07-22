@@ -1,5 +1,7 @@
-import { StyleSheet, Text, View, FlatList } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
 import React from "react";
+import Colors from "../../assets/colors/Colors";
+import Typography from "../../assets/fonts/Typography";
 
 const HomeScreen = ({ cards, profile }) => {
   const renderItem = ({ item }) => (
@@ -10,35 +12,43 @@ const HomeScreen = ({ cards, profile }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>
-        Willkommen, {profile?.firstname || profile?.username || "User"}!
-      </Text>
-      <FlatList
-        data={cards}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={styles.empty}>Keine Karten vorhanden.</Text>
-        }
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.header}>
+          Willkommen, {profile?.firstname || profile?.username || "User"}!
+        </Text>
+        <FlatList
+          data={cards}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <Text style={styles.empty}>
+              Du hast noch keine Einträge erstellt.
+            </Text>
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: "#fff",
   },
   header: {
-    fontSize: 20,
-    fontWeight: "600",
+    ...Typography.h2,
     marginBottom: 16,
+    color: Colors.primary,
   },
   list: {
     paddingBottom: 50,
@@ -50,8 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "bold",
+    ...Typography.h3,
   },
   details: {
     fontSize: 14,
