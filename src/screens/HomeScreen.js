@@ -19,7 +19,7 @@ const HomeScreen = ({ cards = [], profile }) => {
   }, [cards, selectedYear]);
 
   const filteredCards = useMemo(() => {
-    return cards.filter((entry) => {
+    const result = cards.filter((entry) => {
       const yearMatch =
         !selectedYear ||
         new Date(entry.date).getFullYear().toString() === selectedYear;
@@ -28,6 +28,11 @@ const HomeScreen = ({ cards = [], profile }) => {
 
       return yearMatch && waterMatch;
     });
+
+    // Sortieren nach Datum (neueste zuerst)
+    return result.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
   }, [cards, selectedYear, selectedWater]);
 
   const renderItem = ({ item }) => (
@@ -41,9 +46,9 @@ const HomeScreen = ({ cards = [], profile }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerBlock}>
         <View>
-          <Text style={styles.welcome}>Willkommen</Text>
+          <Text style={styles.welcome}>Tight lines,</Text>
           <Text style={styles.header}>
-            {profile?.firstname || profile?.username || "User"}!
+            {profile?.firstname || profile?.username || "User"}
           </Text>
         </View>
         <View style={styles.filterGroup}>
