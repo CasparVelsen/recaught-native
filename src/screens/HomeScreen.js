@@ -39,27 +39,27 @@ const HomeScreen = ({ cards = [], profile }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.headerBlock}>
-          <View>
-            <Text style={styles.welcome}>Willkommen</Text>
-            <Text style={styles.header}>
-              {profile?.firstname || profile?.username || "User"}!
-            </Text>
-          </View>
-          <View style={styles.filterGroup}>
-            <TimeFilter
-              profileCards={cards}
-              selectedYear={selectedYear}
-              onChangeYear={setSelectedYear}
-            />
-            <WaterFilter
-              filteredCardsByTime={filteredByYear}
-              selectedWater={selectedWater}
-              onChangeWater={setSelectedWater}
-            />
-          </View>
+      <View style={styles.headerBlock}>
+        <View>
+          <Text style={styles.welcome}>Willkommen</Text>
+          <Text style={styles.header}>
+            {profile?.firstname || profile?.username || "User"}!
+          </Text>
         </View>
+        <View style={styles.filterGroup}>
+          <TimeFilter
+            profileCards={cards}
+            selectedYear={selectedYear}
+            onChangeYear={setSelectedYear}
+          />
+          <WaterFilter
+            filteredCardsByTime={filteredByYear}
+            selectedWater={selectedWater}
+            onChangeWater={setSelectedWater}
+          />
+        </View>
+      </View>
+      <View style={styles.container}>
         <FlatList
           data={filteredCards}
           keyExtractor={(item) => item._id}
@@ -86,11 +86,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    paddingTop: 0,
     backgroundColor: "#fff",
   },
   headerBlock: {
-    marginBottom: 16,
+    padding: 16,
     flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray,
   },
 
   welcome: {
@@ -116,7 +119,6 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   card: {
-    backgroundColor: "#f0f0f0",
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,

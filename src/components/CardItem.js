@@ -61,11 +61,10 @@ export default CardItem;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.background,
     borderRadius: 16,
-    marginBottom: 12,
+    marginTop: 12,
     borderWidth: 1,
-    borderColor: Colors.secondary,
+    borderColor: Colors.primary,
   },
 
   header: {
@@ -80,10 +79,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRightWidth: 1,
-    borderRightColor: Colors.secondary,
+    borderRightColor: Colors.primary,
     paddingHorizontal: 10,
     paddingRight: 20,
     alignSelf: "stretch",
+    width: "25%",
   },
   day: {
     ...Typography.h1,
