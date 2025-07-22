@@ -1,23 +1,97 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
+  Alert,
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
+  StyleSheet,
   TouchableOpacity,
   ScrollView,
+  TextInput,
+  Modal,
+  FlatList,
+  Pressable,
+  Animated,
+  Easing,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { translateValue } from "../../assets/language/translatedValue";
+import {
+  saveCardToBackend,
+  deleteCardFromBackend,
+} from "../components/backendHandling/backendHandling";
 
-const CardDetailsScreen = ({ route, navigation }) => {
+const selectionOptions = {
+  weather: ["sonnig", "bewölkt", "regnerisch", "windig", "stürmisch", "Schnee"],
+  watercolor: ["klar", "trüb", "leicht trüb"],
+  moon: ["Neumond", "zunehmend", "Vollmond", "abnehmend"],
+  wind: [
+    "Nord",
+    "Nordost",
+    "Ost",
+    "Südost",
+    "Süd",
+    "Südwest",
+    "West",
+    "Nordwest",
+  ],
+  waterlevel: ["niedrig", "normal", "hoch"],
+};
+
+const API_BASE_URL = "http://10.116.131.241:3000";
+
+const CardDetailsScreen = ({
+  route,
+  navigation,
+  token,
+  onUpdate,
+  onDelete,
+}) => {
   const { card } = route.params;
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ ...card });
   const [expandedIndex, setExpandedIndex] = useState(null);
+  const [modalState, setModalState] = useState({
+    key: null,
+    visible: false,
+    catchIndex: null,
+  });
+  const [catchForm, setCatchForm] = useState(null);
+
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
   const toggleExpand = (index) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
+  };
+
+  const handleChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const updatedCard = await saveCardToBackend(token, formData);
+      onUpdate && onUpdate(updatedCard);
+      Alert.alert("Gespeichert", "Dein Eintrag wurde aktualisiert.");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Netzwerkfehler beim Speichern:", error);
+      Alert.alert("Fehler", error.message || "Netzwerkfehler beim Speichern.");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteCardFromBackend(token, formData._id);
+      onDelete && onDelete(formData._id);
+      Alert.alert("Gelöscht", "Dein Eintrag wurde entfernt.");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Löschen fehlgeschlagen:", error);
+      Alert.alert("Fehler", error.message);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -30,21 +104,50 @@ const CardDetailsScreen = ({ route, navigation }) => {
     }).format(date);
   };
 
+  useEffect(() => {
+    if (modalState.visible) {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+    } else {
+      slideAnim.setValue(300);
+    }
+  }, [modalState.visible]);
+
   const renderTile = (label, value, key) => {
-    if (!value && value !== 0) return null;
+    if (!value && value !== 0 && !isEditing) return null;
     const translatedValue = key ? translateValue(key, value) : value;
+    const options = selectionOptions[key];
+    const isSelectable = isEditing && options;
+    const isEditableText = isEditing && !options;
 
     return (
-      <View style={styles.tile}>
-        <Text style={styles.tileValue}>{translatedValue}</Text>
+      <TouchableOpacity
+        onPress={() =>
+          isSelectable ? setModalState({ key, visible: true }) : null
+        }
+        activeOpacity={isSelectable ? 0.8 : 1}
+        style={[styles.tile, isEditing && styles.tileActive]}
+      >
+        {isEditableText ? (
+          <TextInput
+            style={styles.tileValue}
+            value={formData[key]?.toString() || ""}
+            onChangeText={(text) => handleChange(key, text)}
+          />
+        ) : (
+          <Text style={styles.tileValue}>{translatedValue}</Text>
+        )}
         <Text style={styles.tileLabel}>{label}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.headerContainer}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -54,130 +157,261 @@ const CardDetailsScreen = ({ route, navigation }) => {
         </TouchableOpacity>
         <Text style={styles.info}>Erfahrungsbericht vom:</Text>
         <View style={styles.dayWrapper}>
-          <Text style={styles.header}>{formatDate(card.date)}</Text>
+          <Text style={styles.header}>{formatDate(formData.date)}</Text>
           <View style={styles.waterWrapper}>
-            <Text style={styles.waterInfo}>{card.stretch}</Text>
-            <Text style={styles.waterInfo}>{card.water}</Text>
+            {isEditing ? (
+              <>
+                <Text style={[styles.waterInfo, { color: Colors.accent }]}>
+                  {formData.stretch}
+                </Text>
+                <Text style={[styles.waterInfo, { color: Colors.accent }]}>
+                  {formData.water}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.waterInfo}>{formData.stretch}</Text>
+                <Text style={styles.waterInfo}>{formData.water}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Wetter & Wasser-Tiles */}
         <View style={styles.tilesContainer}>
-          {(card.watertemp || card.watercolor || card.waterlevel) && (
+          {(formData.watertemp ||
+            formData.watercolor ||
+            formData.waterlevel) && (
             <View style={styles.tileGroup}>
               <Text style={styles.tileGroupTitle}>Gewässerdaten</Text>
               <View style={styles.tilesRow}>
-                {card.watertemp &&
-                  renderTile("Wassertemp.", `${card.watertemp} °C`)}
-                {card.watercolor &&
-                  renderTile("Wasserfarbe", card.watercolor, "watercolor")}
-                {card.waterlevel &&
-                  renderTile("Wasserstand", card.waterlevel, "waterlevel")}
+                {renderTile("Wassertemp.", formData.watertemp, "watertemp")}
+                {renderTile("Wasserfarbe", formData.watercolor, "watercolor")}
+                {renderTile("Wasserstand", formData.waterlevel, "waterlevel")}
               </View>
             </View>
           )}
-
-          {(card.weather ||
-            card.airpressure ||
-            card.temperature ||
-            card.moon ||
-            card.wind ||
-            card.windspeed) && (
+          {(formData.weather ||
+            formData.airpressure ||
+            formData.temperature ||
+            formData.moon ||
+            formData.wind ||
+            formData.windspeed) && (
             <View style={styles.tileGroup}>
               <Text style={styles.tileGroupTitle}>Wetterdaten</Text>
               <View style={styles.tilesRow}>
-                {renderTile("Wetter", card.weather, "weather")}
-                {renderTile(
-                  "Luftdruck",
-                  card.airpressure && `${card.airpressure} hPa`
-                )}
-                {renderTile(
-                  "Temperatur",
-                  card.temperature && `${card.temperature} °C`
-                )}
-                {renderTile("Mondphase", card.moon, "moon")}
-                {renderTile("Windrichtung", card.wind, "wind")}
-                {renderTile(
-                  "Windgeschw.",
-                  card.windspeed && `${card.windspeed} km/h`
-                )}
+                {renderTile("Wetter", formData.weather, "weather")}
+                {renderTile("Luftdruck", formData.airpressure, "airpressure")}
+                {renderTile("Temperatur", formData.temperature, "temperature")}
+                {renderTile("Mondphase", formData.moon, "moon")}
+                {renderTile("Windrichtung", formData.wind, "wind")}
+                {renderTile("Windgeschw.", formData.windspeed, "windspeed")}
               </View>
             </View>
           )}
         </View>
 
-        {/* Fänge */}
         <View style={styles.section}>
           <Text style={styles.tileGroupTitle}>Fangstatistik</Text>
-          {card.catches?.length > 0 ? (
-            card.catches.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => toggleExpand(index)}
-                style={styles.catchBox}
-              >
-                <View style={styles.catchWrapper}>
-                  <Text style={styles.catchTitle}>
-                    {index + 1}. {item.species}
-                  </Text>
-                  <Text style={styles.catchLength}>{item.length} cm</Text>
-                  <Text style={styles.catchStatus}>
-                    {item.taken ? "entnommen" : "released"}
-                  </Text>
-                </View>
-                {expandedIndex === index && (
-                  <View style={styles.catchExpanded}>
-                    <Field label="Uhrzeit" value={item.time} small />
-                    <Field
-                      label="Gewicht"
-                      value={
-                        item.weight !== undefined
-                          ? `${item.weight} kg`
-                          : undefined
-                      }
-                      small
-                    />
-                    <Field label="Köder" value={item.bait} small />
-                    <Field label="Fangplatz" value={item.location} small />
-                    <Field label="Notizen" value={item.notes} small />
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))
-          ) : (
-            <></>
-          )}
-          <Field label="gefangen" value={card.catches.length} />
-          <Field label="verloren" value={card.lost} />
-          <Field label="Bisse" value={card.bites} />
+          {formData.catches?.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => {
+                setCatchForm({ ...item });
+                setModalState({ key: null, visible: true, catchIndex: index });
+              }}
+              style={[styles.catchBox, isEditing && styles.catchBoxActive]}
+            >
+              <View style={styles.catchWrapper}>
+                <Text style={styles.catchTitle}>
+                  {index + 1}. {item.species}
+                </Text>
+                <Text style={styles.catchLength}>{item.length} cm</Text>
+                <Text style={styles.catchStatus}>
+                  {item.taken ? "entnommen" : "released"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+
+          <Field label="gefangen" value={formData.catches?.length} />
+          <Field
+            label="verloren"
+            value={formData.lost}
+            editableKey="lost"
+            isEditing={isEditing}
+            onChange={handleChange}
+          />
+          <Field
+            label="Bisse"
+            value={formData.bites}
+            editableKey="bites"
+            isEditing={isEditing}
+            onChange={handleChange}
+          />
         </View>
       </ScrollView>
+
+      <View style={styles.editButtonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.editButton,
+            { backgroundColor: isEditing ? Colors.accent : Colors.primary },
+          ]}
+          onPress={async () => {
+            if (isEditing) {
+              await handleSave();
+            }
+            setIsEditing((prev) => !prev);
+          }}
+        >
+          <Text style={styles.editButtonText}>
+            {isEditing ? "Speichern" : "Bearbeiten"}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() =>
+            Alert.alert("Eintrag löschen?", "Bist du sicher?", [
+              { text: "Abbrechen", style: "cancel" },
+              {
+                text: "Löschen",
+                style: "destructive",
+                onPress: handleDelete,
+              },
+            ])
+          }
+        >
+          <Text style={styles.deleteButtonText}>Löschen</Text>
+        </TouchableOpacity>
+      </View>
+
+      {modalState.visible && (
+        <Modal transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalContent,
+                { transform: [{ translateY: slideAnim }] },
+              ]}
+            >
+              {modalState.catchIndex !== null && catchForm ? (
+                <>
+                  {[
+                    "species",
+                    "length",
+                    "weight",
+                    "bait",
+                    "location",
+                    "notes",
+                  ].map((field) => (
+                    <TextInput
+                      key={field}
+                      style={styles.modalInput}
+                      placeholder={field}
+                      value={catchForm?.[field] || ""}
+                      onChangeText={(text) =>
+                        setCatchForm((prev) => ({ ...prev, [field]: text }))
+                      }
+                    />
+                  ))}
+                  <TouchableOpacity
+                    style={styles.toggleTaken}
+                    onPress={() =>
+                      setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
+                    }
+                  >
+                    <Text style={styles.modalText}>
+                      {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() => {
+                      const updated = [...formData.catches];
+                      updated[modalState.catchIndex] = catchForm;
+                      setFormData((prev) => ({ ...prev, catches: updated }));
+                      setModalState({
+                        key: null,
+                        visible: false,
+                        catchIndex: null,
+                      });
+                      setCatchForm(null);
+                    }}
+                  >
+                    <Text style={styles.modalText}>Speichern</Text>
+                  </TouchableOpacity>
+                </>
+              ) : modalState.key !== null ? (
+                <FlatList
+                  data={selectionOptions[modalState.key]}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={styles.modalItem}
+                      onPress={() => {
+                        handleChange(modalState.key, item);
+                        setModalState({
+                          key: null,
+                          visible: false,
+                          catchIndex: null,
+                        });
+                      }}
+                    >
+                      <Text style={styles.modalText}>{item}</Text>
+                    </Pressable>
+                  )}
+                />
+              ) : null}
+
+              <Pressable
+                onPress={() => {
+                  setModalState({
+                    key: null,
+                    visible: false,
+                    catchIndex: null,
+                  });
+                  setCatchForm(null);
+                }}
+                style={styles.modalCancel}
+              >
+                <Text style={styles.modalText}>Abbrechen</Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 };
 
 export default CardDetailsScreen;
 
-// ---------- Sub-Komponenten ----------
+const Field = ({ label, value, editableKey, isEditing, onChange }) => {
+  if (!value && value !== 0 && !isEditing) return null;
 
-const Field = ({ label, value, small }) => {
-  if (!value && value !== 0) return null;
   return (
     <View style={styles.dataRow}>
-      <Text style={[styles.label, small && styles.smallText]}>{label}:</Text>
-      <Text style={[styles.value, small && styles.smallText]}>{value}</Text>
+      <Text style={styles.label}>{label}:</Text>
+      {isEditing && editableKey ? (
+        <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+          <Text style={[styles.value, { color: Colors.accent }]}>
+            {value?.toString() || ""}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.value}>{value}</Text>
+      )}
     </View>
   );
 };
 
-// ---------- Styles ----------
+// ---------- STYLES ----------
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -224,13 +458,10 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-
-  // Tile-Gruppen
   tilesContainer: {
     marginBottom: 24,
     gap: 24,
   },
-  tileGroup: {},
   tileGroupTitle: {
     ...Typography.subtitle,
     color: Colors.primary,
@@ -248,10 +479,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 6, // ⬅️ das ist neu
-    marginBottom: 12, // optional für Abstand nach unten
+    marginHorizontal: 6,
+    marginBottom: 12,
   },
-
+  tileActive: {
+    borderColor: Colors.accent,
+  },
   tileValue: {
     ...Typography.body,
     color: Colors.primary,
@@ -261,21 +494,9 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.secondary,
   },
-
-  // Abschnitte
   section: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    ...Typography.subtitle,
-    color: Colors.secondary,
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray,
-    paddingBottom: 4,
-  },
-
-  // Felder & Texte
   dataRow: {
     flexDirection: "row",
     marginBottom: 4,
@@ -289,11 +510,13 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     ...Typography.caption,
   },
-  smallText: {
-    fontSize: 13,
+  input: {
+    borderBottomWidth: 1,
+    borderColor: Colors.gray,
+    paddingVertical: 2,
+    color: Colors.primary,
+    minWidth: 60,
   },
-
-  // Catch-Boxen
   catchBox: {
     padding: 10,
     marginBottom: 10,
@@ -321,11 +544,92 @@ const styles = StyleSheet.create({
     width: "30%",
     textAlign: "right",
   },
-  noCatches: {
-    fontStyle: "italic",
-    color: "#999",
-  },
   catchExpanded: {
     marginTop: 10,
+  },
+  editButtonContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray,
+    backgroundColor: Colors.white,
+  },
+  editButton: {
+    backgroundColor: Colors.accent,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  editButtonText: {
+    color: Colors.white,
+    ...Typography.body,
+    fontWeight: "bold",
+  },
+  selectable: {
+    textDecorationLine: "underline",
+    color: Colors.accent,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    marginHorizontal: 30,
+    borderRadius: 10,
+    padding: 20,
+    maxHeight: "60%",
+  },
+  modalItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray,
+  },
+  modalCancel: {
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  modalText: {
+    ...Typography.body,
+    textAlign: "center",
+    color: Colors.primary,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: Colors.gray,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    ...Typography.body,
+    color: Colors.primary,
+    backgroundColor: Colors.white,
+  },
+
+  toggleTaken: {
+    paddingVertical: 10,
+    alignItems: "center",
+    marginBottom: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.grayLight,
+  },
+  saveButtonText: {
+    color: Colors.accent,
+    ...Typography.body,
+    textAlign: "center",
+  },
+  catchBoxActive: {
+    borderColor: Colors.accent,
+  },
+  deleteButton: {
+    backgroundColor: Colors.accent, // definiere `danger` in deiner Farbpalette z. B. als "#D9534F"
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  deleteButtonText: {
+    color: Colors.white,
+    ...Typography.body,
+    fontWeight: "bold",
   },
 });

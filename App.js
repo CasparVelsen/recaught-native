@@ -64,11 +64,25 @@ export default function App() {
                 <BottomNav token={token} profile={profile} cards={cards} />
               )}
             </Stack.Screen>
-            <Stack.Screen
-              name="CardDetails"
-              component={CardDetailsScreen}
-              options={{ title: "Details", headerBackTitleVisible: false }}
-            />
+            <Stack.Screen name="CardDetails">
+              {({ route, navigation }) => (
+                <CardDetailsScreen
+                  route={route}
+                  navigation={navigation}
+                  token={token}
+                  onUpdate={(updatedCard) => {
+                    setCards((prev) =>
+                      prev.map((c) =>
+                        c._id === updatedCard._id ? updatedCard : c
+                      )
+                    );
+                  }}
+                  onDelete={(deletedId) => {
+                    setCards((prev) => prev.filter((c) => c._id !== deletedId));
+                  }}
+                />
+              )}
+            </Stack.Screen>
           </>
         ) : (
           <>
