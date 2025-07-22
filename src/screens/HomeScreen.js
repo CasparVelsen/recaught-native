@@ -94,12 +94,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: Colors.gray,
+    alignItems: "flex-end",
   },
 
   welcome: {
     ...Typography.subtitle,
     color: Colors.primary,
-    marginBottom: 4,
   },
 
   header: {
