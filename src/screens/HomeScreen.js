@@ -1,9 +1,34 @@
 import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
+import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
 
-const HomeScreen = ({ cards, profile }) => {
+const HomeScreen = ({ cards = [], profile }) => {
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedWater, setSelectedWater] = useState("");
+
+  const filteredByYear = useMemo(() => {
+    return cards.filter((entry) => {
+      return (
+        !selectedYear ||
+        new Date(entry.date).getFullYear().toString() === selectedYear
+      );
+    });
+  }, [cards, selectedYear]);
+
+  const filteredCards = useMemo(() => {
+    return cards.filter((entry) => {
+      const yearMatch =
+        !selectedYear ||
+        new Date(entry.date).getFullYear().toString() === selectedYear;
+
+      const waterMatch = !selectedWater || entry.water === selectedWater;
+
+      return yearMatch && waterMatch;
+    });
+  }, [cards, selectedYear, selectedWater]);
+
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.water}</Text>
@@ -14,17 +39,36 @@ const HomeScreen = ({ cards, profile }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.header}>
-          Willkommen, {profile?.firstname || profile?.username || "User"}!
-        </Text>
+        <View style={styles.headerBlock}>
+          <View>
+            <Text style={styles.welcome}>Willkommen</Text>
+            <Text style={styles.header}>
+              {profile?.firstname || profile?.username || "User"}!
+            </Text>
+          </View>
+          <View style={styles.filterGroup}>
+            <TimeFilter
+              profileCards={cards}
+              selectedYear={selectedYear}
+              onChangeYear={setSelectedYear}
+            />
+            <WaterFilter
+              filteredCardsByTime={filteredByYear}
+              selectedWater={selectedWater}
+              onChangeWater={setSelectedWater}
+            />
+          </View>
+        </View>
+
+        {/* 📄 Kartenliste */}
         <FlatList
-          data={cards}
+          data={filteredCards}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              Du hast noch keine Einträge erstellt.
+              Keine Einträge gefunden mit diesen Filtern.
             </Text>
           }
         />
@@ -45,11 +89,30 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
   },
-  header: {
-    ...Typography.h2,
+  headerBlock: {
     marginBottom: 16,
-    color: Colors.primary,
+    flexDirection: "row",
   },
+
+  welcome: {
+    ...Typography.subtitle,
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+
+  header: {
+    ...Typography.h1,
+    color: Colors.primary,
+    flexShrink: 1, // erlaubt dem Text kleiner zu werden, wenn nötig
+  },
+
+  filterGroup: {
+    flexDirection: "row",
+    flexShrink: 1,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  },
+
   list: {
     paddingBottom: 50,
   },

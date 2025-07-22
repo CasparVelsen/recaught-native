@@ -7,11 +7,11 @@ const Typography = {
     fontWeight: "700", // Bold
   },
   h2: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "700",
   },
   h3: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "600", // SemiBold
   },
 
