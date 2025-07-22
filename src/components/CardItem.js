@@ -62,7 +62,7 @@ export default CardItem;
 const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
-    marginTop: 12,
+    marginTop: 16,
     borderWidth: 1,
     borderColor: Colors.primary,
   },
