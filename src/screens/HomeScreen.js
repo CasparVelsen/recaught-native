@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
+import CardItem from "../components/CardItem";
 
 const HomeScreen = ({ cards = [], profile }) => {
   const [selectedYear, setSelectedYear] = useState("");
@@ -59,12 +60,10 @@ const HomeScreen = ({ cards = [], profile }) => {
             />
           </View>
         </View>
-
-        {/* 📄 Kartenliste */}
         <FlatList
           data={filteredCards}
           keyExtractor={(item) => item._id}
-          renderItem={renderItem}
+          renderItem={({ item }) => <CardItem data={item} />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={styles.empty}>

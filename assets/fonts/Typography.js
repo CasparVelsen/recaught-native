@@ -7,7 +7,7 @@ const Typography = {
     fontWeight: "700", // Bold
   },
   h2: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
   },
   h3: {

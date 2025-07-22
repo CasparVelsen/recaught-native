@@ -24,10 +24,10 @@ export function TimeFilter({ profileCards, selectedYear, onChangeYear }) {
         style={styles.filterButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={[styles.filterText, { color: "#ff9c27" }]}>
-          {selectedYear || "Zeitraum"}
+        <Text style={[styles.filterText, { color: Colors.accent }]}>
+          {selectedYear || "Saison"}
         </Text>
-        <Ionicons name="chevron-down" size={24} color="#ff9c27" />
+        <Ionicons name="chevron-down" size={24} color={Colors.accent} />
       </TouchableOpacity>
 
       <AnimatedDropdown
@@ -61,10 +61,10 @@ export function WaterFilter({
         style={styles.filterButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={[styles.filterText, { color: "#687a48" }]}>
+        <Text style={[styles.filterText, { color: Colors.primary }]}>
           {selectedWater || "Gewässer"}
         </Text>
-        <Ionicons name="chevron-down" size={24} color="#687a48" />
+        <Ionicons name="chevron-down" size={24} color={Colors.primary} />
       </TouchableOpacity>
 
       <AnimatedDropdown
