@@ -98,7 +98,6 @@ const CardDetailsScreen = ({
       const updatedCard = await saveCardToBackend(token, cleanedData);
       onUpdate && onUpdate(updatedCard);
       Alert.alert("Gespeichert", "Dein Eintrag wurde aktualisiert.");
-      navigation.goBack();
     } catch (error) {
       console.error("Netzwerkfehler beim Speichern:", error);
       Alert.alert("Fehler", error.message || "Netzwerkfehler beim Speichern.");
@@ -559,7 +558,7 @@ const styles = StyleSheet.create({
   },
   catchBox: {
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.gray,
@@ -575,7 +574,7 @@ const styles = StyleSheet.create({
     width: "30%",
   },
   catchLength: {
-    color: Colors.accent,
+    color: Colors.secondary,
     ...Typography.body,
   },
   catchStatus: {
