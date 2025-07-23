@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
+import Typography from "../../assets/fonts/Typography";
 
 const initialForm = {
   firstname: "",
@@ -88,29 +89,31 @@ export default function SignupPage({ onLoginSuccess }) {
         <Text style={styles.subtitle}>Jetzt kostenlos registrieren</Text>
 
         <View style={styles.form}>
-          {["firstname", "lastname", "username", "password"].map((field, i) => (
-            <View style={styles.inputGroup} key={field}>
-              <Text style={styles.label}>
-                {field === "firstname"
-                  ? "Vorname"
-                  : field === "lastname"
-                  ? "Nachname"
-                  : field === "username"
-                  ? "Benutzername"
-                  : "Passwort"}
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={`${
-                  field === "password" ? "Passwort" : "Dein " + field
-                }`}
-                value={form[field]}
-                onChangeText={(value) => handleOnChange(field, value)}
-                secureTextEntry={field === "password"}
-                autoCapitalize={field === "username" ? "none" : "words"}
-              />
-            </View>
-          ))}
+          {["Vorname", "Nachname", "Benutzername", "Passwort"].map(
+            (field, i) => (
+              <View style={styles.inputGroup} key={field}>
+                <Text style={styles.label}>
+                  {field === "firstname"
+                    ? "Vorname"
+                    : field === "lastname"
+                    ? "Nachname"
+                    : field === "username"
+                    ? "Benutzername"
+                    : "Passwort"}
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={`${
+                    field === "password" ? "Passwort" : "Dein " + field
+                  }`}
+                  value={form[field]}
+                  onChangeText={(value) => handleOnChange(field, value)}
+                  secureTextEntry={field === "password"}
+                  autoCapitalize={field === "username" ? "none" : "words"}
+                />
+              </View>
+            )
+          )}
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -141,83 +144,80 @@ export default function SignupPage({ onLoginSuccess }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
   },
   container: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 100,
     backgroundColor: Colors.white,
     flexGrow: 1,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
+    ...Typography.h1,
     color: Colors.primary,
   },
   subtitle: {
-    fontSize: 18,
+    ...Typography.subtitle,
     color: Colors.secondary,
     marginTop: 10,
   },
   form: {
-    marginTop: 20,
-    borderWidth: 0.5,
-    borderColor: Colors.secondary,
-    borderRadius: 10,
-    padding: 16,
-    backgroundColor: Colors.background,
+    marginTop: 30,
+    padding: 20,
+    borderRadius: 16,
+    backgroundColor: Colors.grayLight, // entspricht FormSteps-Stil
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 18,
-    marginBottom: 5,
+    ...Typography.body,
     color: Colors.primary,
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.secondary,
-    color: Colors.primary,
-    borderRadius: 5,
-    padding: 10,
+    borderColor: Colors.gray,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     fontSize: 16,
+    color: Colors.primary,
     backgroundColor: Colors.white,
   },
   buttonContainer: {
     alignItems: "flex-end",
   },
   loginButton: {
-    backgroundColor: Colors.secondary,
-    paddingVertical: 12,
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 6,
+    borderRadius: 12,
   },
   disabledButton: {
     backgroundColor: Colors.gray,
   },
   loginText: {
+    ...Typography.button,
     color: Colors.white,
-    fontWeight: "bold",
-    fontSize: 16,
   },
   signUp: {
-    marginTop: 20,
+    marginTop: 30,
     alignItems: "center",
   },
   signUpText: {
+    ...Typography.body,
     color: Colors.secondary,
-    fontSize: 16,
   },
   signUpButton: {
     marginTop: 10,
     backgroundColor: Colors.accent,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
   },
   signUpButtonText: {
+    ...Typography.button,
     color: Colors.white,
-    fontWeight: "bold",
   },
 });

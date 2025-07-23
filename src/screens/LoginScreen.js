@@ -9,8 +9,10 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
+import Typography from "../../assets/fonts/Typography";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
 
@@ -21,6 +23,7 @@ export default function LoginScreen({ onLoginSuccess }) {
   });
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleOnChange = (name, value) => {
     setCredentials((prev) => ({ ...prev, [name]: value }));
@@ -62,12 +65,12 @@ export default function LoginScreen({ onLoginSuccess }) {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Login</Text>
         <Text style={styles.subtitle}>
-          You have to login first to see your data
+          Bitte logge Dich ein, damit du deine Daten siehst.
         </Text>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Your user name</Text>
+            <Text style={styles.label}>Dein Benutzername</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter your user name"
@@ -78,14 +81,26 @@ export default function LoginScreen({ onLoginSuccess }) {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              secureTextEntry
-              onChangeText={(value) => handleOnChange("password", value)}
-              value={credentials.password}
-            />
+            <Text style={styles.label}>Dein Passwort</Text>
+            <View style={styles.passwordInputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                secureTextEntry={!showPassword}
+                onChangeText={(value) => handleOnChange("password", value)}
+                value={credentials.password}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword((prev) => !prev)}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color={Colors.primary}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -98,17 +113,19 @@ export default function LoginScreen({ onLoginSuccess }) {
               disabled={disabled || loading}
             >
               <Text style={styles.loginText}>
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Einloggen..." : "Login"}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.signUp}>
-          <Text style={styles.signUpText}>You don't have an account yet?</Text>
+          <Text style={styles.signUpText}>Du hast noch keinen Account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
             <View style={styles.signUpButton}>
-              <Text style={styles.signUpButtonText}>Sign up now</Text>
+              <Text style={styles.signUpButtonText}>
+                Jetzt Account erstellen
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -120,83 +137,92 @@ export default function LoginScreen({ onLoginSuccess }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
   },
   container: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 100,
     backgroundColor: Colors.white,
     flexGrow: 1,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
+    ...Typography.h1,
     color: Colors.primary,
   },
   subtitle: {
-    fontSize: 18,
+    ...Typography.subtitle,
     color: Colors.secondary,
     marginTop: 10,
   },
   form: {
-    marginTop: 20,
-    borderWidth: 0.5,
-    borderColor: Colors.secondary,
-    borderRadius: 10,
-    padding: 16,
-    backgroundColor: Colors.background,
+    marginTop: 30,
+    padding: 20,
+    borderRadius: 16,
+    backgroundColor: Colors.grayLight, // wie bei Steps
   },
   inputGroup: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 18,
-    marginBottom: 5,
+    ...Typography.body,
     color: Colors.primary,
+    marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.secondary,
-    color: Colors.primary,
-    borderRadius: 5,
-    padding: 10,
+    borderColor: Colors.gray,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingRight: 40, // für das Icon
     fontSize: 16,
+    color: Colors.primary,
     backgroundColor: Colors.white,
   },
+
   buttonContainer: {
     alignItems: "flex-end",
   },
   loginButton: {
-    backgroundColor: Colors.secondary,
-    paddingVertical: 12,
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 6,
+    borderRadius: 12,
   },
   disabledButton: {
     backgroundColor: Colors.gray,
   },
   loginText: {
+    ...Typography.button,
     color: Colors.white,
-    fontWeight: "bold",
-    fontSize: 16,
   },
   signUp: {
-    marginTop: 20,
+    marginTop: 30,
     alignItems: "center",
   },
   signUpText: {
+    ...Typography.body,
     color: Colors.secondary,
-    fontSize: 16,
   },
   signUpButton: {
     marginTop: 10,
     backgroundColor: Colors.accent,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
   },
   signUpButtonText: {
+    ...Typography.button,
     color: Colors.white,
-    fontWeight: "bold",
+  },
+  passwordInputWrapper: {
+    position: "relative",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 12,
+    top: 7,
+    padding: 4,
+    zIndex: 1,
   },
 });
