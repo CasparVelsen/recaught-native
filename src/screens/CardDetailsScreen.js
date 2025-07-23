@@ -13,6 +13,7 @@ import {
   Pressable,
   Animated,
   Easing,
+  useFocusEffect,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../assets/colors/Colors";

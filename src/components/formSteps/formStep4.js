@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.gray,
     borderRadius: 8,
-    padding: 12,
+    padding: 10,
     backgroundColor: "#fff",
   },
   selectText: {

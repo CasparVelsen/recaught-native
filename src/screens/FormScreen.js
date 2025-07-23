@@ -19,8 +19,9 @@ import Step4 from "../components/formSteps/formStep4";
 import Step5 from "../components/formSteps/formStep5";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
+import { submitCardToBackend } from "../components/backendHandling/backendHandling";
 
-export default function FormScreen() {
+export default function FormScreen({ token }) {
   const navigation = useNavigation();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
@@ -48,7 +49,24 @@ export default function FormScreen() {
   const cancel = () => navigation.goBack();
 
   const handleChange = (data) => {
-    setForm({ ...form, ...data });
+    const numericKeys = [
+      "temperature",
+      "airpressure",
+      "watertemp",
+      "windspeed",
+      "bites",
+      "lost",
+    ];
+
+    const parsedData = Object.entries(data).reduce((acc, [key, value]) => {
+      acc[key] =
+        numericKeys.includes(key) && value !== "" && value !== null
+          ? Number(value)
+          : value;
+      return acc;
+    }, {});
+
+    setForm((prev) => ({ ...prev, ...parsedData }));
   };
 
   const renderStep = () => {
@@ -126,9 +144,11 @@ export default function FormScreen() {
         {step === totalSteps && (
           <TouchableOpacity
             style={[styles.button, styles.buttonPrimary]}
-            onPress={() => {
-              console.log("Submit:", form);
-              navigation.goBack();
+            onPress={async () => {
+              const result = await submitCardToBackend(token, form);
+              if (result) {
+                navigation.goBack();
+              }
             }}
           >
             <Text style={styles.buttonPrimaryText}>Erstellen</Text>

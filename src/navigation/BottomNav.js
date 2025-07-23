@@ -47,7 +47,7 @@ const BottomNav = ({ token, cards, profile }) => {
       })}
     >
       <Tab.Screen name="Home">
-        {() => <HomeScreen token={token} profile={profile} cards={cards} />}
+        {() => <HomeScreen token={token} profile={profile} />}
       </Tab.Screen>
 
       <Tab.Screen

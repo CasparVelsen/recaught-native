@@ -40,6 +40,29 @@ export default function Step1({ data, onChange }) {
           placeholder="Zielart"
         />
       </View>
+      <View style={styles.fieldRow}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Bisse insgesamt</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={data.bites?.toString() || ""}
+            onChangeText={(v) => onChange({ bites: v })}
+            placeholder="0"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Fische verloren</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={data.lost?.toString() || ""}
+            onChangeText={(v) => onChange({ lost: v })}
+            placeholder="0"
+          />
+        </View>
+      </View>
     </View>
   );
 }
@@ -61,9 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
   },
-  fullWidth: {
-    marginTop: 20,
-  },
+  fullWidth: {},
   label: {
     ...Typography.body,
     color: Colors.primary,
@@ -75,7 +96,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     fontSize: 14,
-    color: "#333",
+    color: "#ccc",
     backgroundColor: "#fff",
+    marginBottom: 20,
   },
 });

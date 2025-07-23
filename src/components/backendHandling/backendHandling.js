@@ -46,20 +46,25 @@ export const deleteCardFromBackend = async (token, cardId) => {
   }
 };
 
-export const submitData = async (data, token) => {
-  const res = await fetch("https://deine-domain/api/cards", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, // <- Token korrekt übergeben
-    },
-    body: JSON.stringify(data), // <- einzelnes Objekt, kein Array!
-  });
+export const submitCardToBackend = async (token, formData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/cards`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData), // EIN Objekt, kein Array
+    });
 
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Fehler beim Speichern");
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Speichern fehlgeschlagen");
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
   }
-
-  return await res.json();
 };

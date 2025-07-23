@@ -16,45 +16,31 @@ const API_BASE_URL = "http://10.116.131.241:3000";
 export default function App() {
   const [token, setToken] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [cards, setCards] = useState([]);
 
   useEffect(() => {
     if (!token) return;
 
-    const loadUserData = async () => {
+    const loadProfile = async () => {
       try {
-        // 1. Profil laden
-        const profileRes = await fetch(`${API_BASE_URL}/api/users/profile`, {
+        const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const profileData = await profileRes.json();
-        if (!profileRes.ok || !profileData._id) {
-          console.error("Fehler beim Laden des Profils:", profileData);
+        const data = await res.json();
+
+        if (!res.ok || !data._id) {
+          console.error("Fehler beim Laden des Profils:", data);
           return;
         }
 
-        setProfile(profileData);
-
-        // 2. Karten des Users laden (über Token autorisiert)
-        const cardsRes = await fetch(`${API_BASE_URL}/api/cards`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const cardsData = await cardsRes.json();
-        if (!cardsRes.ok) {
-          console.error("Fehler beim Laden der Karten:", cardsData);
-          return;
-        }
-
-        setCards(cardsData);
+        setProfile(data);
       } catch (error) {
-        console.error("Netzwerkfehler beim Laden:", error);
+        console.error("Netzwerkfehler beim Laden des Profils:", error);
       }
     };
 
-    loadUserData();
+    loadProfile();
   }, [token]);
 
   const theme = {
@@ -71,10 +57,9 @@ export default function App() {
           {token ? (
             <>
               <Stack.Screen name="HomeTabs">
-                {() => (
-                  <BottomNav token={token} profile={profile} cards={cards} />
-                )}
+                {() => <BottomNav token={token} profile={profile} />}
               </Stack.Screen>
+
               <Stack.Screen
                 name="FormScreen"
                 options={{
@@ -84,24 +69,13 @@ export default function App() {
               >
                 {() => <FormScreen token={token} />}
               </Stack.Screen>
+
               <Stack.Screen name="CardDetails">
                 {({ route, navigation }) => (
                   <CardDetailsScreen
                     route={route}
                     navigation={navigation}
                     token={token}
-                    onUpdate={(updatedCard) => {
-                      setCards((prev) =>
-                        prev.map((c) =>
-                          c._id === updatedCard._id ? updatedCard : c
-                        )
-                      );
-                    }}
-                    onDelete={(deletedId) => {
-                      setCards((prev) =>
-                        prev.filter((c) => c._id !== deletedId)
-                      );
-                    }}
                   />
                 )}
               </Stack.Screen>

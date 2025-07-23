@@ -12,7 +12,7 @@ export const selectionOptions = {
     "Nordwest",
   ],
   watercolor: ["klar", "trüb", "leicht trüb"],
-  waterlevel: ["high", "low", "normal"],
+  waterlevel: ["hoch", "niederig", "normal"],
   germanFishSpecies: [
     "Aal",
     "Aland",

@@ -1,13 +1,42 @@
 import { SafeAreaView, StyleSheet, Text, View, FlatList } from "react-native";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
 import CardItem from "../components/CardItem";
 
-const HomeScreen = ({ cards = [], profile }) => {
+const API_BASE_URL = "http://10.116.131.241:3000";
+
+const HomeScreen = ({ token, profile }) => {
+  const [cards, setCards] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedWater, setSelectedWater] = useState("");
+
+  // Holt Karten beim Fokussieren des Screens
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCards = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/cards`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            console.error("Fehler beim Laden der Karten:", data);
+            return;
+          }
+
+          setCards(data);
+        } catch (err) {
+          console.error("Netzwerkfehler beim Laden der Karten:", err);
+        }
+      };
+
+      fetchCards();
+    }, [token])
+  );
 
   const filteredByYear = useMemo(() => {
     return cards.filter((entry) => {
@@ -19,28 +48,16 @@ const HomeScreen = ({ cards = [], profile }) => {
   }, [cards, selectedYear]);
 
   const filteredCards = useMemo(() => {
-    const result = cards.filter((entry) => {
-      const yearMatch =
-        !selectedYear ||
-        new Date(entry.date).getFullYear().toString() === selectedYear;
-
-      const waterMatch = !selectedWater || entry.water === selectedWater;
-
-      return yearMatch && waterMatch;
-    });
-
-    // Sortieren nach Datum (neueste zuerst)
-    return result.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return cards
+      .filter((entry) => {
+        const yearMatch =
+          !selectedYear ||
+          new Date(entry.date).getFullYear().toString() === selectedYear;
+        const waterMatch = !selectedWater || entry.water === selectedWater;
+        return yearMatch && waterMatch;
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [cards, selectedYear, selectedWater]);
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.title}>{item.water}</Text>
-      <Text style={styles.details}>{item.date}</Text>
-    </View>
-  );
 
   return (
     <SafeAreaView style={styles.safeArea}>

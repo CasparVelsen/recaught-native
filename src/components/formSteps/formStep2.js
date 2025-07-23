@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
-    marginBottom: 16,
   },
 
   label: {
@@ -181,12 +180,14 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 14,
+    marginBottom: 20,
   },
   selectInput: {
     borderWidth: 1,
     borderColor: Colors.gray,
     borderRadius: 8,
-    padding: 12,
+    padding: 10,
+    marginBottom: 20,
   },
   selectText: {
     color: "#bbb",
