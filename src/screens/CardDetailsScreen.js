@@ -70,9 +70,32 @@ const CardDetailsScreen = ({
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const toNumber = (value) => {
+    const num = parseFloat(value);
+    return isNaN(num) ? null : num;
+  };
+
+  const sanitizeFormData = (data) => {
+    return {
+      ...data,
+      watertemp: toNumber(data.watertemp),
+      airpressure: toNumber(data.airpressure),
+      temperature: toNumber(data.temperature),
+      windspeed: toNumber(data.windspeed),
+      bites: toNumber(data.bites),
+      lost: toNumber(data.lost),
+      catches: data.catches?.map((c) => ({
+        ...c,
+        length: toNumber(c.length),
+        weight: toNumber(c.weight),
+      })),
+    };
+  };
+
   const handleSave = async () => {
     try {
-      const updatedCard = await saveCardToBackend(token, formData);
+      const cleanedData = sanitizeFormData(formData);
+      const updatedCard = await saveCardToBackend(token, cleanedData);
       onUpdate && onUpdate(updatedCard);
       Alert.alert("Gespeichert", "Dein Eintrag wurde aktualisiert.");
       navigation.goBack();
@@ -161,12 +184,16 @@ const CardDetailsScreen = ({
           <View style={styles.waterWrapper}>
             {isEditing ? (
               <>
-                <Text style={[styles.waterInfo, { color: Colors.accent }]}>
-                  {formData.stretch}
-                </Text>
-                <Text style={[styles.waterInfo, { color: Colors.accent }]}>
-                  {formData.water}
-                </Text>
+                <TextInput
+                  style={[styles.waterInfo, { color: Colors.accent }]}
+                  value={formData.stretch}
+                  onChangeText={(text) => handleChange("stretch", text)}
+                />
+                <TextInput
+                  style={[styles.waterInfo, { color: Colors.accent }]}
+                  value={formData.water}
+                  onChangeText={(text) => handleChange("water", text)}
+                />
               </>
             ) : (
               <>
@@ -261,7 +288,7 @@ const CardDetailsScreen = ({
         <TouchableOpacity
           style={[
             styles.editButton,
-            { backgroundColor: isEditing ? Colors.accent : Colors.primary },
+            { borderColor: isEditing ? Colors.accent : Colors.primary },
           ]}
           onPress={async () => {
             if (isEditing) {
@@ -270,25 +297,40 @@ const CardDetailsScreen = ({
             setIsEditing((prev) => !prev);
           }}
         >
-          <Text style={styles.editButtonText}>
+          <Text
+            style={[
+              styles.editButtonText,
+              { color: isEditing ? Colors.accent : Colors.primary },
+            ]}
+          >
             {isEditing ? "Speichern" : "Bearbeiten"}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() =>
-            Alert.alert("Eintrag löschen?", "Bist du sicher?", [
-              { text: "Abbrechen", style: "cancel" },
-              {
-                text: "Löschen",
-                style: "destructive",
-                onPress: handleDelete,
-              },
-            ])
-          }
-        >
-          <Text style={styles.deleteButtonText}>Löschen</Text>
-        </TouchableOpacity>
+
+        {isEditing ? (
+          <TouchableOpacity
+            style={[styles.deleteButton, { backgroundColor: Colors.primary }]}
+            onPress={() => setIsEditing(false)}
+          >
+            <Text style={styles.deleteButtonText}>Abbrechen</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() =>
+              Alert.alert("Eintrag löschen?", "Bist du sicher?", [
+                { text: "Abbrechen", style: "cancel" },
+                {
+                  text: "Löschen",
+                  style: "destructive",
+                  onPress: handleDelete,
+                },
+              ])
+            }
+          >
+            <Text style={styles.deleteButtonText}>Löschen</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {modalState.visible && (
@@ -314,7 +356,7 @@ const CardDetailsScreen = ({
                       key={field}
                       style={styles.modalInput}
                       placeholder={field}
-                      value={catchForm?.[field] || ""}
+                      value={catchForm?.[field]?.toString() || ""}
                       onChangeText={(text) =>
                         setCatchForm((prev) => ({ ...prev, [field]: text }))
                       }
@@ -334,7 +376,7 @@ const CardDetailsScreen = ({
                     style={styles.saveButton}
                     onPress={() => {
                       const updated = [...formData.catches];
-                      updated[modalState.catchIndex] = catchForm;
+                      updated[modalState.catchIndex] = { ...catchForm };
                       setFormData((prev) => ({ ...prev, catches: updated }));
                       setModalState({
                         key: null,
@@ -399,11 +441,12 @@ const Field = ({ label, value, editableKey, isEditing, onChange }) => {
     <View style={styles.dataRow}>
       <Text style={styles.label}>{label}:</Text>
       {isEditing && editableKey ? (
-        <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-          <Text style={[styles.value, { color: Colors.accent }]}>
-            {value?.toString() || ""}
-          </Text>
-        </TouchableOpacity>
+        <TextInput
+          style={[styles.value, styles.input]}
+          value={value?.toString() || ""}
+          onChangeText={(text) => onChange(editableKey, text)}
+          keyboardType="numeric"
+        />
       ) : (
         <Text style={styles.value}>{value}</Text>
       )}
@@ -503,18 +546,15 @@ const styles = StyleSheet.create({
   },
   label: {
     width: "30%",
-    ...Typography.caption,
+    ...Typography.body,
     color: Colors.primary,
   },
   value: {
     color: Colors.secondary,
-    ...Typography.caption,
+    ...Typography.body,
   },
   input: {
-    borderBottomWidth: 1,
-    borderColor: Colors.gray,
-    paddingVertical: 2,
-    color: Colors.primary,
+    color: Colors.accent,
     minWidth: 60,
   },
   catchBox: {
@@ -554,7 +594,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   editButton: {
-    backgroundColor: Colors.accent,
+    borderWidth: 1,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
