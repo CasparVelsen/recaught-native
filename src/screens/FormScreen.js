@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   headerTitle: {
-    ...Typography.h3,
+    ...Typography.subtitle,
     color: Colors.primary,
   },
 

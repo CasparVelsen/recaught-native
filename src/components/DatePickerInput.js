@@ -76,13 +76,12 @@ export default function DatePickerInput({ value, onChange }) {
 const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
-    borderColor: Colors.accent,
-    borderRadius: 5,
+    borderColor: Colors.gray,
+    borderRadius: 8,
     padding: 10,
-    backgroundColor: "#fff",
   },
   inputText: {
-    color: "#333",
+    color: "#bbb",
   },
   modalOverlay: {
     flex: 1,

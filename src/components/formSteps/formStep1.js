@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   title: {
-    ...Typography.subtitle,
+    ...Typography.h2,
     color: Colors.primary,
-    marginBottom: 20,
+    marginBottom: 26,
   },
   fieldRow: {
     flexDirection: "row",
@@ -65,20 +65,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   label: {
-    fontSize: 14,
-    color: "#444",
+    ...Typography.body,
+    color: Colors.primary,
     marginBottom: 6,
-  },
-  hint: {
-    fontSize: 12,
-    color: "#aaa",
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.accent,
-    borderRadius: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    borderColor: Colors.gray,
+    borderRadius: 8,
+    padding: 10,
     fontSize: 14,
     color: "#333",
     backgroundColor: "#fff",
