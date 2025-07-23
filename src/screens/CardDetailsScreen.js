@@ -177,12 +177,19 @@ const CardDetailsScreen = ({
         >
           <Ionicons name="arrow-back" size={24} color={Colors.accent} />
         </TouchableOpacity>
-        <Text style={styles.info}>Erfahrungsbericht vom:</Text>
         <View style={styles.dayWrapper}>
-          <Text style={styles.header}>{formatDate(formData.date)}</Text>
+          <View>
+            <Text style={styles.info}>Erfahrungsbericht vom:</Text>
+            <Text style={styles.header}>{formatDate(formData.date)}</Text>
+          </View>
           <View style={styles.waterWrapper}>
             {isEditing ? (
               <>
+                <Ionicons
+                  name="location-outline"
+                  size={24}
+                  color={Colors.accent}
+                />
                 <TextInput
                   style={[styles.waterInfo, { color: Colors.accent }]}
                   value={formData.stretch}
@@ -196,6 +203,11 @@ const CardDetailsScreen = ({
               </>
             ) : (
               <>
+                <Ionicons
+                  name="location-outline"
+                  size={24}
+                  color={Colors.secondary}
+                />
                 <Text style={styles.waterInfo}>{formData.stretch}</Text>
                 <Text style={styles.waterInfo}>{formData.water}</Text>
               </>
