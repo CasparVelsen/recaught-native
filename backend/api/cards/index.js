@@ -4,13 +4,12 @@ import jwt from "jsonwebtoken";
 
 const { JWT_SECRET } = process.env;
 
-export default async function handler(request, response) {
+export default async function handler(req, res) {
   await dbConnect();
 
-  // Prüfe JWT bei allen Methoden außer OPTIONS
-  const authHeader = request.headers.authorization;
+  const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return response.status(401).json({ message: "No token provided" });
+    return res.status(401).json({ message: "No token provided" });
   }
 
   let userId;
@@ -19,40 +18,71 @@ export default async function handler(request, response) {
     const decoded = jwt.verify(token, JWT_SECRET);
     userId = decoded.sub;
   } catch (err) {
-    return response.status(401).json({ message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 
-  switch (request.method) {
+  switch (req.method) {
     case "GET": {
-      const cards = await Card.find({ author: userId }).sort({ createdAt: -1 });
-      return response.status(200).json(cards);
+      try {
+        const cards = await Card.find({ author: userId }).sort({
+          createdAt: -1,
+        });
+        return res.status(200).json(cards);
+      } catch (err) {
+        return res
+          .status(500)
+          .json({ message: "Fehler beim Laden der Karten" });
+      }
     }
 
     case "POST": {
-      const newCard = await Card.create({ ...request.body, author: userId });
-      return response.status(201).json(newCard);
+      try {
+        const newCard = await Card.create({
+          ...req.body,
+          author: userId,
+        });
+        return res.status(201).json(newCard);
+      } catch (err) {
+        console.error("POST Error:", err);
+        return res
+          .status(400)
+          .json({ message: "Fehler beim Erstellen der Karte" });
+      }
     }
 
     case "PUT": {
-      const { _id, ...updateData } = request.body;
+      const { _id, ...updateData } = req.body;
       if (!_id) {
-        return response.status(400).json({ error: "Missing _id for update" });
+        return res.status(400).json({ error: "Missing _id for update" });
       }
-      const updatedCard = await Card.findOneAndUpdate(
-        { _id, author: userId }, // Sicherheitsfilter: nur eigene Karten
-        updateData,
-        { new: true, runValidators: true }
-      );
-      return response.status(200).json(updatedCard);
+      try {
+        const updatedCard = await Card.findOneAndUpdate(
+          { _id, author: userId },
+          updateData,
+          { new: true, runValidators: true }
+        );
+        return res.status(200).json(updatedCard);
+      } catch (err) {
+        return res
+          .status(400)
+          .json({ message: "Fehler beim Aktualisieren der Karte" });
+      }
     }
 
     case "DELETE": {
-      const { _id } = request.body;
-      const result = await Card.findOneAndDelete({ _id, author: userId });
-      return response.status(200).json(result);
+      const { _id } = req.body;
+      if (!_id) {
+        return res.status(400).json({ error: "Missing _id for delete" });
+      }
+      try {
+        const result = await Card.findOneAndDelete({ _id, author: userId });
+        return res.status(200).json(result);
+      } catch (err) {
+        return res.status(400).json({ message: "Fehler beim Löschen" });
+      }
     }
 
     default:
-      return response.status(405).json({ error: "Method not allowed" });
+      return res.status(405).json({ error: "Method not allowed" });
   }
 }

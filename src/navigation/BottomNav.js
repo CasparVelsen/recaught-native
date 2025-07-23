@@ -2,11 +2,12 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
 import Colors from "../../assets/colors/Colors";
 
 // Screens
 import HomeScreen from "../screens/HomeScreen";
-import FormScreen from "../screens/FormScreen";
 import StatisticsScreen from "../screens/StatisticsScreen";
 
 const Tab = createBottomTabNavigator();
@@ -33,12 +34,6 @@ const BottomNav = ({ token, cards, profile }) => {
 
           if (route.name === "Home") {
             iconName = "fish";
-          } else if (route.name === "Form") {
-            return (
-              <View style={styles.customPlusButtonIcon}>
-                <Ionicons name="add-outline" size={30} color="#fff" />
-              </View>
-            );
           } else if (route.name === "Statistics") {
             iconName = "stats-chart";
           }
@@ -54,16 +49,16 @@ const BottomNav = ({ token, cards, profile }) => {
       <Tab.Screen name="Home">
         {() => <HomeScreen token={token} profile={profile} cards={cards} />}
       </Tab.Screen>
+
       <Tab.Screen
         name="Form"
         options={{
-          tabBarButton: (props) => (
-            <CustomTabBarButton {...props} cards={cards} profile={profile} />
-          ),
+          tabBarButton: () => <CustomTabBarButton />,
         }}
       >
-        {() => <FormScreen token={token} profile={profile} cards={cards} />}
+        {() => null}
       </Tab.Screen>
+
       <Tab.Screen name="Statistics">
         {() => (
           <StatisticsScreen token={token} profile={profile} cards={cards} />
@@ -73,15 +68,21 @@ const BottomNav = ({ token, cards, profile }) => {
   );
 };
 
-const CustomTabBarButton = ({ children, onPress }) => (
-  <TouchableOpacity
-    style={styles.customButtonContainer}
-    onPress={onPress}
-    activeOpacity={0.7}
-  >
-    <View style={styles.customPlusButton}>{children}</View>
-  </TouchableOpacity>
-);
+const CustomTabBarButton = () => {
+  const navigation = useNavigation();
+
+  return (
+    <TouchableOpacity
+      style={styles.customButtonContainer}
+      onPress={() => navigation.navigate("FormScreen")}
+      activeOpacity={0.7}
+    >
+      <View style={styles.customPlusButton}>
+        <Ionicons name="add-outline" size={30} color="#fff" />
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   customButtonContainer: {
@@ -104,10 +105,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-  },
-  customPlusButtonIcon: {
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
 

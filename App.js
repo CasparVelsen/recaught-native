@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Provider as PaperProvider } from "react-native-paper";
 
 import LoginScreen from "./src/screens/LoginScreen";
 import SignupScreen from "./src/screens/SignupScreen";
 import BottomNav from "./src/navigation/BottomNav";
 import CardDetailsScreen from "./src/screens/CardDetailsScreen";
+import FormScreen from "./src/screens/FormScreen";
+import Colors from "./assets/colors/Colors";
 
 const Stack = createNativeStackNavigator();
 const API_BASE_URL = "http://10.116.131.241:3000";
@@ -54,47 +57,67 @@ export default function App() {
     loadUserData();
   }, [token]);
 
+  const theme = {
+    colors: {
+      primary: Colors.primary,
+      accent: Colors.accent,
+    },
+  };
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {token ? (
-          <>
-            <Stack.Screen name="HomeTabs">
-              {() => (
-                <BottomNav token={token} profile={profile} cards={cards} />
-              )}
-            </Stack.Screen>
-            <Stack.Screen name="CardDetails">
-              {({ route, navigation }) => (
-                <CardDetailsScreen
-                  route={route}
-                  navigation={navigation}
-                  token={token}
-                  onUpdate={(updatedCard) => {
-                    setCards((prev) =>
-                      prev.map((c) =>
-                        c._id === updatedCard._id ? updatedCard : c
-                      )
-                    );
-                  }}
-                  onDelete={(deletedId) => {
-                    setCards((prev) => prev.filter((c) => c._id !== deletedId));
-                  }}
-                />
-              )}
-            </Stack.Screen>
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login">
-              {() => <LoginScreen onLoginSuccess={setToken} />}
-            </Stack.Screen>
-            <Stack.Screen name="Signup">
-              {() => <SignupScreen onLoginSuccess={setToken} />}
-            </Stack.Screen>
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <PaperProvider theme={theme}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {token ? (
+            <>
+              <Stack.Screen name="HomeTabs">
+                {() => (
+                  <BottomNav token={token} profile={profile} cards={cards} />
+                )}
+              </Stack.Screen>
+              <Stack.Screen
+                name="FormScreen"
+                options={{
+                  presentation: "modal",
+                  headerShown: false,
+                }}
+              >
+                {() => <FormScreen token={token} />}
+              </Stack.Screen>
+              <Stack.Screen name="CardDetails">
+                {({ route, navigation }) => (
+                  <CardDetailsScreen
+                    route={route}
+                    navigation={navigation}
+                    token={token}
+                    onUpdate={(updatedCard) => {
+                      setCards((prev) =>
+                        prev.map((c) =>
+                          c._id === updatedCard._id ? updatedCard : c
+                        )
+                      );
+                    }}
+                    onDelete={(deletedId) => {
+                      setCards((prev) =>
+                        prev.filter((c) => c._id !== deletedId)
+                      );
+                    }}
+                  />
+                )}
+              </Stack.Screen>
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login">
+                {() => <LoginScreen onLoginSuccess={setToken} />}
+              </Stack.Screen>
+              <Stack.Screen name="Signup">
+                {() => <SignupScreen onLoginSuccess={setToken} />}
+              </Stack.Screen>
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
