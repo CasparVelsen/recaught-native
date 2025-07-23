@@ -9,20 +9,11 @@ import {
   Modal,
   Animated,
   StyleSheet,
+  Keyboard,
 } from "react-native";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
-
-const speciesOptions = [
-  "Hecht",
-  "Zander",
-  "Barsch",
-  "Karpfen",
-  "Forelle",
-  "Wels",
-  "Aal",
-];
 
 export default function Step4({ data, onChange }) {
   const [catchForm, setCatchForm] = useState({
@@ -34,6 +25,9 @@ export default function Step4({ data, onChange }) {
     notes: "",
     taken: false,
   });
+
+  const [customSpecies, setCustomSpecies] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
@@ -48,6 +42,7 @@ export default function Step4({ data, onChange }) {
   };
 
   const closeModal = () => {
+    Keyboard.dismiss();
     Animated.timing(slideAnim, {
       toValue: 300,
       duration: 200,
@@ -58,13 +53,15 @@ export default function Step4({ data, onChange }) {
   };
 
   const addCatch = () => {
-    if (!catchForm.species || !catchForm.length) return;
+    if (!catchForm.species) return;
 
     const newCatch = {
       ...catchForm,
       _id: Date.now(),
-      length: parseFloat(catchForm.length),
-      weight: parseFloat(catchForm.weight),
+      length:
+        catchForm.length.trim() === "" ? null : parseFloat(catchForm.length),
+      weight:
+        catchForm.weight.trim() === "" ? null : parseFloat(catchForm.weight),
     };
 
     onChange({ catches: [...(data.catches || []), newCatch] });
@@ -98,7 +95,7 @@ export default function Step4({ data, onChange }) {
     <View style={styles.wrapper}>
       <Text style={styles.title}>Fänge hinzufügen</Text>
 
-      {/* Art und Länge */}
+      {/* Art und Bait */}
       <View style={styles.row}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Art</Text>
@@ -109,34 +106,7 @@ export default function Step4({ data, onChange }) {
           </Pressable>
         </View>
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Länge (cm)</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={catchForm.length}
-            onChangeText={(v) =>
-              setCatchForm((prev) => ({ ...prev, length: v }))
-            }
-          />
-        </View>
-      </View>
-
-      {/* Gewicht & Bait */}
-      <View style={styles.row}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Gewicht (kg)</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={catchForm.weight}
-            onChangeText={(v) =>
-              setCatchForm((prev) => ({ ...prev, weight: v }))
-            }
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Köder</Text>
+          <Text style={styles.label}>Fliege</Text>
           <TextInput
             style={styles.input}
             value={catchForm.bait}
@@ -145,46 +115,91 @@ export default function Step4({ data, onChange }) {
         </View>
       </View>
 
-      {/* Location */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Ort</Text>
-        <TextInput
-          style={styles.input}
-          value={catchForm.location}
-          onChangeText={(v) =>
-            setCatchForm((prev) => ({ ...prev, location: v }))
-          }
-        />
+      {/* Länge & Gewicht */}
+      <View style={styles.row}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Länge</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={catchForm.length}
+            onChangeText={(v) =>
+              setCatchForm((prev) => ({ ...prev, length: v }))
+            }
+            placeholder="cm"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Gewicht</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={catchForm.weight}
+            onChangeText={(v) =>
+              setCatchForm((prev) => ({ ...prev, weight: v }))
+            }
+            placeholder="kg"
+          />
+        </View>
+      </View>
+
+      {/* Location und Taken */}
+      <View style={styles.row}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Fangplatz</Text>
+          <TextInput
+            style={styles.input}
+            value={catchForm.location}
+            onChangeText={(v) =>
+              setCatchForm((prev) => ({ ...prev, location: v }))
+            }
+          />
+        </View>
+        <View>
+          <Text style={styles.label}>{""}</Text>
+          <Pressable
+            style={[
+              styles.toggleTaken,
+              catchForm.taken && {
+                borderColor: Colors.accent,
+              },
+            ]}
+            onPress={() =>
+              setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
+            }
+          >
+            <Text
+              style={[
+                styles.toggleText,
+                catchForm.taken && { color: Colors.accent },
+              ]}
+            >
+              {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* Notes */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Notizen</Text>
         <TextInput
-          style={[styles.input, { minHeight: 50 }]}
+          style={styles.input}
           multiline
           value={catchForm.notes}
           onChangeText={(v) => setCatchForm((prev) => ({ ...prev, notes: v }))}
         />
       </View>
 
-      {/* Taken Switch */}
+      {/* Add Catch Button */}
       <Pressable
         style={[
-          styles.toggleTaken,
-          catchForm.taken && { backgroundColor: Colors.accent },
+          styles.addButton,
+          !catchForm.species && styles.addButtonDisabled,
         ]}
-        onPress={() =>
-          setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
-        }
+        onPress={addCatch}
+        disabled={!catchForm.species}
       >
-        <Text style={styles.toggleText}>
-          {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
-        </Text>
-      </Pressable>
-
-      {/* Add Catch Button */}
-      <Pressable style={styles.addButton} onPress={addCatch}>
         <Text style={styles.addButtonText}>+ Fang hinzufügen</Text>
       </Pressable>
 
@@ -199,9 +214,11 @@ export default function Step4({ data, onChange }) {
             style={styles.catchItem}
             onPress={() => removeCatch(item._id)}
           >
+            <Text style={styles.catchText}>{item.species}</Text>
+            {item.length != null && (
+              <Text style={styles.catchText}>{item.length} cm</Text>
+            )}
             <Text style={styles.catchText}>
-              {item.species} – {item.length} cm
-              {item.weight ? `, ${item.weight} kg` : ""} –{" "}
               {item.taken ? "Entnommen" : "Zurückgesetzt"}
             </Text>
           </Pressable>
@@ -233,6 +250,39 @@ export default function Step4({ data, onChange }) {
                 </Pressable>
               )}
             />
+            <Pressable
+              style={styles.modalItem}
+              onPress={() => setShowCustomInput(true)}
+            >
+              <Text style={[styles.modalItemText, { color: Colors.accent }]}>
+                + Eigene Art hinzufügen
+              </Text>
+            </Pressable>
+            {showCustomInput && (
+              <View style={{ padding: 16 }}>
+                <TextInput
+                  placeholder="Eigene Art eingeben"
+                  value={customSpecies}
+                  onChangeText={setCustomSpecies}
+                  style={styles.input}
+                />
+                <Pressable
+                  style={[styles.addButton, { marginTop: 10 }]}
+                  onPress={() => {
+                    if (!customSpecies.trim()) return;
+                    setCatchForm((prev) => ({
+                      ...prev,
+                      species: customSpecies.trim(),
+                    }));
+                    setCustomSpecies("");
+                    setShowCustomInput(false);
+                    closeModal();
+                  }}
+                >
+                  <Text style={styles.addButtonText}>Hinzufügen</Text>
+                </Pressable>
+              </View>
+            )}
           </Animated.View>
         </Modal>
       )}
@@ -247,7 +297,7 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.h2,
     color: Colors.primary,
-    marginBottom: 16,
+    marginBottom: 26,
   },
   row: {
     flexDirection: "row",
@@ -255,7 +305,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   label: {
     ...Typography.body,
@@ -279,12 +329,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   selectText: {
-    color: "#333",
+    color: "#bbb",
   },
   toggleTaken: {
-    marginTop: 8,
     borderWidth: 1,
-    borderColor: Colors.accent,
+    borderColor: Colors.primary,
     borderRadius: 8,
     padding: 10,
     alignItems: "center",
@@ -300,19 +349,26 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 12,
+    marginBottom: 10,
   },
   addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    ...Typography.button,
+    color: Colors.white,
+  },
+  addButtonDisabled: {
+    backgroundColor: Colors.gray,
   },
   catchItem: {
     padding: 12,
-    backgroundColor: "#f4f4f4",
+    borderWidth: 1,
+    borderColor: Colors.secondary,
     borderRadius: 8,
     marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   catchText: {
-    color: Colors.primary,
+    color: Colors.secondary,
     fontSize: 16,
   },
   modalOverlay: {

@@ -48,7 +48,7 @@ export default function Step3({ data, onChange }) {
 
       {/* Strecke + Wassertemperatur */}
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Strecke</Text>
+        <Text style={styles.label}>Gewässerabschnitt</Text>
         <TextInput
           style={styles.input}
           value={data.stretch || ""}
