@@ -21,7 +21,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
-import WeatherStats from "../components/stats/WeatherStats";
+import LineStats from "../components/stats/LineStats";
+import BarStats from "../components/stats/BarStats";
 import { getEnvironmentStats } from "../utils/stats";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
@@ -248,7 +249,8 @@ const StatsScreen = ({ token, profile }) => {
           </TouchableOpacity>
         </View>
 
-        {stats && <WeatherStats stats={stats} />}
+        {stats && <LineStats stats={stats} />}
+        {stats && <BarStats stats={stats} />}
       </ScrollView>
 
       {overlayVisible && (
