@@ -13,7 +13,6 @@ const StatsScreen = ({ token, profile }) => {
   const [cards, setCards] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedWater, setSelectedWater] = useState("");
-  const [stats, setStats] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,7 +24,6 @@ const StatsScreen = ({ token, profile }) => {
           const data = await res.json();
           if (res.ok) {
             setCards(data);
-            setStats(getEnvironmentStats(data));
           } else {
             console.error("Fehler beim Laden:", data);
           }
@@ -37,7 +35,6 @@ const StatsScreen = ({ token, profile }) => {
       fetchCards();
     }, [token])
   );
-
   const filteredCards = useMemo(() => {
     return cards.filter((entry) => {
       const yearMatch =
@@ -47,6 +44,10 @@ const StatsScreen = ({ token, profile }) => {
       return yearMatch && waterMatch;
     });
   }, [cards, selectedYear, selectedWater]);
+
+  const stats = useMemo(() => {
+    return getEnvironmentStats(filteredCards);
+  }, [filteredCards]);
 
   const allCatches = useMemo(() => {
     return filteredCards.flatMap((card) => card.catches || []);

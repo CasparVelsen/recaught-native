@@ -27,21 +27,32 @@ export const fetchCards = async (token) => {
  */
 const createStatMap = (cards, field) => {
   const map = {};
+  const allValues = new Set();
 
   cards.forEach((card) => {
     const value = card[field];
     const count = (card.catches || []).length;
 
-    if (value == null || count === 0) return;
+    if (value == null) return;
 
-    map[value] = (map[value] || 0) + count;
+    allValues.add(value); // alle beobachteten Werte merken
+
+    if (!map.hasOwnProperty(value)) {
+      map[value] = 0;
+    }
+
+    map[value] += count;
   });
 
-  return Object.entries(map)
-    .map(([key, value]) => [typeof key === "string" ? key : Number(key), value])
-    .sort((a, b) =>
-      typeof a[0] === "number" ? a[0] - b[0] : a[0].localeCompare(b[0])
-    );
+  // Jetzt sicherstellen, dass alle bekannten Werte im Ergebnis sind
+  const filled = Array.from(allValues).map((key) => [
+    typeof key === "string" ? key : Number(key),
+    map[key] || 0,
+  ]);
+
+  return filled.sort((a, b) =>
+    typeof a[0] === "number" ? a[0] - b[0] : a[0].localeCompare(b[0])
+  );
 };
 
 /**

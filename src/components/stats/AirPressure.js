@@ -1,11 +1,13 @@
-// Beispiel: Verwendung in deiner AirPressure-Komponente
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Typography from "../../../assets/fonts/Typography";
 import Colors from "../../../assets/colors/Colors";
-import CustomLineChart from "../charts/CustomLineChart";
+import SkiaLineChart from "../charts/LineChartSkia";
+import ChartTooltip from "../charts/ChartToolTip";
 
 const AirPressure = ({ airpressureStats }) => {
+  const [hoverPoint, setHoverPoint] = useState(null);
+
   if (!airpressureStats || airpressureStats.length === 0) {
     return (
       <View style={styles.container}>
@@ -18,23 +20,16 @@ const AirPressure = ({ airpressureStats }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Luftdruck</Text>
-      <CustomLineChart
-        title="Luftdruck"
-        data={airpressureStats}
-        step={1}
-        unit="hPa"
-        color={Colors.primary}
-      />
+
+      <ChartTooltip point={hoverPoint} />
+
+      <SkiaLineChart data={airpressureStats} onPointChange={setHoverPoint} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
+  container: {},
   title: {
     ...Typography.subtitle,
     color: Colors.primary,

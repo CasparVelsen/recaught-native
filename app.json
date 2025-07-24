@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/images/logo192.png"
-    }
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
