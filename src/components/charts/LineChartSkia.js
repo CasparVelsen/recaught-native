@@ -17,6 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 const CHART_HEIGHT = 180;
+const AnimatedView = Animated.createAnimatedComponent(View);
 
 const interpolateMissing = (data, step = 1) => {
   if (!data || data.length < 2) return data;
@@ -87,15 +88,18 @@ const normalizeData = (data, width, height, minY, maxY) => {
   }));
 };
 
-const SkiaLineChart = ({
-  data = [],
-  color = Colors.primary,
-  step = 1,
-  onPointChange,
-}) => {
-  if (!Array.isArray(data) || data.length === 0) return null;
+const SkiaLineChart = (props) => {
+  // sichere Props mit Defaults im Body
+  const data = Array.isArray(props.data) ? props.data : [];
+  const color = props.color || Colors.primary;
+  const step = props.step ?? 1;
+  const onPointChange = props.onPointChange;
 
-  const { width: containerWidth } = useWindowDimensions();
+  if (data.length === 0) return null;
+
+  // Memoisiere containerWidth für Stabilität
+  const { width: rawWidth } = useWindowDimensions();
+  const containerWidth = useMemo(() => rawWidth, [rawWidth]);
 
   const interpolated = useMemo(
     () => interpolateMissing(data, step),
@@ -148,7 +152,7 @@ const SkiaLineChart = ({
   return (
     <View style={styles.wrapper}>
       <PanGestureHandler onGestureEvent={onGestureEvent}>
-        <Animated.View>
+        <AnimatedView>
           <Canvas style={styles.canvas}>
             <Path path={areaPath}>
               <LinearGradient
@@ -165,7 +169,7 @@ const SkiaLineChart = ({
             />
             <Circle cx={markerPoint.x} cy={markerPoint.y} r={4} color={color} />
           </Canvas>
-        </Animated.View>
+        </AnimatedView>
       </PanGestureHandler>
     </View>
   );
@@ -176,4 +180,4 @@ const styles = StyleSheet.create({
   canvas: { height: CHART_HEIGHT, backgroundColor: "#fff" },
 });
 
-export default SkiaLineChart;
+export default React.memo(SkiaLineChart);

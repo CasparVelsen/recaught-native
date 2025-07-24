@@ -94,8 +94,6 @@ const StatsScreen = ({ token, profile }) => {
         </View>
       </View>
 
-      {stats && <WeatherStats stats={stats} />}
-
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Fänge nach Art</Text>
@@ -122,6 +120,7 @@ const StatsScreen = ({ token, profile }) => {
             <Text style={styles.empty}>Keine Daten verfügbar.</Text>
           )}
         </View>
+        {stats && <WeatherStats stats={stats} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -157,7 +156,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   content: {
-    padding: 20,
     paddingBottom: 60,
   },
   section: {
