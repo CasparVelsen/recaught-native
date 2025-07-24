@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
-import AirPressure from "../components/stats/AirPressure";
+import WeatherStats from "../components/stats/WeatherStats";
 import { getEnvironmentStats } from "../utils/stats";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
@@ -94,7 +94,7 @@ const StatsScreen = ({ token, profile }) => {
         </View>
       </View>
 
-      {stats && <AirPressure airpressureStats={stats.airpressure} />}
+      {stats && <WeatherStats stats={stats} />}
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.section}>

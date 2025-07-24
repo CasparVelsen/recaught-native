@@ -19,10 +19,12 @@ const ChartTooltip = ({ point }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 8,
+    alignItems: "flex-end",
+    gap: 4,
   },
   text: {
     color: Colors.accent,
+    ...Typography.subtitle,
   },
 });
 

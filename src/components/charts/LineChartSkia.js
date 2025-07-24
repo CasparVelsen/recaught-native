@@ -1,10 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {
-  Dimensions,
-  View,
-  StyleSheet,
-  useWindowDimensions,
-} from "react-native";
+import React, { useEffect, useState, useMemo } from "react";
+import { View, StyleSheet, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Path,
@@ -18,7 +13,6 @@ import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedGestureHandler,
-  useDerivedValue,
   runOnJS,
 } from "react-native-reanimated";
 
@@ -56,7 +50,6 @@ const buildSmoothPath = (points) => {
     const p2 = points[i + 1];
     const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
 
-    // Catmull-Rom to Cubic Bezier
     const cp1x = p1.x + (p2.x - p0.x) / 6;
     const cp1y = p1.y + (p2.y - p0.y) / 6;
 
@@ -90,7 +83,7 @@ const normalizeData = (data, width, height, minY, maxY) => {
 
   return data.map(([_, y], i) => ({
     x: horizontalPadding + (i / (count - 1)) * usableWidth,
-    y: topPadding + usableHeight * (1 - (y - minY) / rangeY), // Skaliert mit Padding
+    y: topPadding + usableHeight * (1 - (y - minY) / rangeY),
   }));
 };
 
@@ -100,56 +93,56 @@ const SkiaLineChart = ({
   step = 1,
   onPointChange,
 }) => {
-  const { width: containerWidth } = useWindowDimensions();
   if (!Array.isArray(data) || data.length === 0) return null;
 
-  const interpolated = interpolateMissing(data, step);
-  const ys = interpolated.map(([, y]) => y);
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
+  const { width: containerWidth } = useWindowDimensions();
 
-  const maxIndex = ys.indexOf(maxY);
-
-  const points = normalizeData(
-    interpolated,
-    containerWidth,
-    CHART_HEIGHT,
-    minY,
-    maxY
+  const interpolated = useMemo(
+    () => interpolateMissing(data, step),
+    [data, step]
   );
-  const linePath = buildSmoothPath(points);
-  const areaPath = buildSmoothAreaPath(points);
+  const ys = useMemo(() => interpolated.map(([, y]) => y), [interpolated]);
 
-  const gestureX = useSharedValue(points[maxIndex]?.x || 0);
-  const [selectedIndex, setSelectedIndex] = useState(maxIndex);
+  const minY = ys.length > 0 ? Math.min(...ys) : 0;
+  const maxY = ys.length > 0 ? Math.max(...ys) : 0;
+  const maxIndex = ys.length > 0 ? ys.indexOf(maxY) : 0;
 
-  // Call initial value once
+  const points = useMemo(
+    () => normalizeData(interpolated, containerWidth, CHART_HEIGHT, minY, maxY),
+    [interpolated, containerWidth, minY, maxY]
+  );
+
+  const linePath = useMemo(() => buildSmoothPath(points), [points]);
+  const areaPath = useMemo(() => buildSmoothAreaPath(points), [points]);
+
+  const safeMarkerPoint = points[maxIndex] ?? { x: 0, y: 0 };
+
+  const gestureX = useSharedValue(safeMarkerPoint.x);
+  const [markerPoint, setMarkerPoint] = useState(safeMarkerPoint);
+
   useEffect(() => {
-    if (onPointChange) {
+    if (onPointChange && interpolated.length > 0) {
       onPointChange(interpolated[maxIndex]);
     }
-  }, [onPointChange]);
+  }, [interpolated, maxIndex, onPointChange]);
+
+  const updateMarker = (x) => {
+    const index = Math.round((x / containerWidth) * (points.length - 1));
+    if (index >= 0 && index < points.length) {
+      setMarkerPoint(points[index]);
+      if (onPointChange) onPointChange(interpolated[index]);
+    }
+  };
 
   const onGestureEvent = useAnimatedGestureHandler({
     onStart: (event) => {
       gestureX.value = event.x;
+      runOnJS(updateMarker)(event.x);
     },
     onActive: (event) => {
       gestureX.value = event.x;
-      const i = Math.round((event.x / containerWidth) * (points.length - 1));
-      if (i >= 0 && i < points.length) {
-        runOnJS(setSelectedIndex)(i);
-        if (onPointChange) runOnJS(onPointChange)(interpolated[i]);
-      }
+      runOnJS(updateMarker)(event.x);
     },
-  });
-
-  const marker = useDerivedValue(() => {
-    if (!points.length) return null;
-    const index = Math.round(
-      (gestureX.value / containerWidth) * (points.length - 1)
-    );
-    return points[index];
   });
 
   return (
@@ -170,14 +163,7 @@ const SkiaLineChart = ({
               style="stroke"
               strokeWidth={3}
             />
-            {marker.value && (
-              <Circle
-                cx={marker.value.x}
-                cy={marker.value.y}
-                r={4}
-                color={color}
-              />
-            )}
+            <Circle cx={markerPoint.x} cy={markerPoint.y} r={4} color={color} />
           </Canvas>
         </Animated.View>
       </PanGestureHandler>
@@ -186,13 +172,8 @@ const SkiaLineChart = ({
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-  },
-  canvas: {
-    height: CHART_HEIGHT,
-    backgroundColor: "#fff",
-  },
+  wrapper: { width: "100%" },
+  canvas: { height: CHART_HEIGHT, backgroundColor: "#fff" },
 });
 
 export default SkiaLineChart;
