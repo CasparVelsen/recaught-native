@@ -294,13 +294,36 @@ const CardDetailsScreen = ({
                     {item.taken ? "entnommen" : "released"}
                   </Text>
                 </View>
+                {expandedIndex === index && (
+                  <View style={styles.catchExpanded}>
+                    {/* deine Detail-Zeilen */}
+                    {item.time && (
+                      <View style={styles.catchDetailRow}>
+                        <Text style={styles.detailText}>Uhrzeit:</Text>
+                        <Text style={styles.detailValue}>{item.time} Uhr</Text>
+                      </View>
+                    )}
+                    {item.weight && (
+                      <View style={styles.catchDetailRow}>
+                        <Text style={styles.detailText}>Gewicht:</Text>
+                        <Text style={styles.detailValue}>{item.weight} kg</Text>
+                      </View>
+                    )}
+                    {item.bait && (
+                      <View style={styles.catchDetailRow}>
+                        <Text style={styles.detailText}>Fliege:</Text>
+                        <Text style={styles.detailValue}>{item.bait}</Text>
+                      </View>
+                    )}
+                    {item.notes && (
+                      <View style={styles.catchDetailRow}>
+                        <Text style={styles.detailText}>Notizen:</Text>
+                        <Text style={styles.detailValue}>{item.notes}</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
               </TouchableOpacity>
-
-              {expandedIndex === index && item.time && (
-                <View style={styles.catchExpanded}>
-                  {/* deine Detail-Zeilen */}
-                </View>
-              )}
             </View>
           ))}
 
@@ -405,26 +428,48 @@ const CardDetailsScreen = ({
                   ["species", "bait"],
                   ["length", "weight"],
                   ["time", "location"],
-                  ["notes", null],
                 ].map((pair, row) => (
                   <View key={row} style={styles.modalRow}>
                     {pair.map((field, idx) =>
                       field ? (
-                        <TextInput
-                          key={field}
-                          style={[styles.modalInput, styles.modalInputHalf]}
-                          placeholder={fieldLabels[field]}
-                          value={catchForm[field]?.toString() || ""}
-                          onChangeText={(text) =>
-                            setCatchForm((prev) => ({ ...prev, [field]: text }))
-                          }
-                        />
+                        <View key={field} style={styles.modalInputWrapper}>
+                          {/* Hier kommt der Input-Titel */}
+                          <Text style={styles.inputTitle}>
+                            {fieldLabels[field]}
+                          </Text>
+
+                          {/* Dein TextInput */}
+                          <TextInput
+                            style={[styles.modalInput, styles.modalInputHalf]}
+                            placeholder={fieldLabels[field]}
+                            value={catchForm[field]?.toString() || ""}
+                            onChangeText={(text) =>
+                              setCatchForm((prev) => ({
+                                ...prev,
+                                [field]: text,
+                              }))
+                            }
+                          />
+                        </View>
                       ) : (
                         <View key={idx} style={styles.modalInputHalf} />
                       )
                     )}
                   </View>
                 ))}
+
+                <View>
+                  <Text style={styles.inputTitle}>Notizen</Text>
+                  <TextInput
+                    key={fieldLabels.notes}
+                    style={styles.modalInput}
+                    placeholder={fieldLabels.notes}
+                    value={catchForm.notes?.toString() || ""}
+                    onChangeText={(text) =>
+                      setCatchForm((prev) => ({ ...prev, species: text }))
+                    }
+                  />
+                </View>
 
                 {/* Entnommen‐Toggle */}
                 <TouchableOpacity
@@ -664,7 +709,11 @@ const styles = StyleSheet.create({
     ...Typography.small.fontSize,
     width: "20%",
   },
-  detailValue: { color: Colors.secondary },
+  detailValue: {
+    color: Colors.secondary,
+    flex: 1,
+    flexWrap: "wrap",
+  },
   editButtonContainer: {
     padding: 16,
     borderTopWidth: 1,
@@ -710,7 +759,7 @@ const styles = StyleSheet.create({
   modalText: {
     ...Typography.body,
     textAlign: "center",
-    color: Colors.primary,
+    color: "#ccc",
   },
   modalInput: {
     borderWidth: 1,
@@ -719,7 +768,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     ...Typography.body,
-    color: Colors.primary,
+    color: "#ccc",
     backgroundColor: Colors.white,
   },
   modalHeader: {
@@ -746,17 +795,25 @@ const styles = StyleSheet.create({
   },
   modalRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 8,
+    gap: 16,
+    // ...
+  },
+  modalInputWrapper: {
+    flex: 1,
+  },
+  inputTitle: {
+    ...Typography.body,
+    marginBottom: 4,
+    color: Colors.primary,
   },
   modalInputHalf: {
-    width: "48%",
+    width: "100%",
   },
 
   modalButtonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
   },
   modalButton: {
     flex: 1,
