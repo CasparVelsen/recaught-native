@@ -334,6 +334,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.gray,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    // Shadow (Android)
+    elevation: 4,
   },
   tileValue: {
     ...Typography.body,
@@ -359,6 +367,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     justifyContent: "flex-start",
+    borderWidth: 1,
+    borderColor: Colors.gray,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    // Shadow (Android)
+    elevation: 4,
   },
   tileTitle: {
     ...Typography.h3,
@@ -429,6 +445,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 6,
     gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    // Shadow (Android)
+    elevation: 4,
   },
   modalListCount: {
     ...Typography.body,

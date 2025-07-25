@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Keyboard,
 } from "react-native";
+import TimePickerInput from "../TimePickerInput";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
@@ -20,15 +21,14 @@ export default function Step4({ data, onChange }) {
     species: "",
     length: "",
     weight: "",
+    time: "",
     bait: "",
     location: "",
     notes: "",
     taken: false,
   });
-
   const [customSpecies, setCustomSpecies] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
-
   const [modalOpen, setModalOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
@@ -47,14 +47,11 @@ export default function Step4({ data, onChange }) {
       toValue: 300,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => {
-      setModalOpen(false);
-    });
+    }).start(() => setModalOpen(false));
   };
 
   const addCatch = () => {
     if (!catchForm.species) return;
-
     const newCatch = {
       ...catchForm,
       _id: Date.now(),
@@ -63,13 +60,12 @@ export default function Step4({ data, onChange }) {
       weight:
         catchForm.weight.trim() === "" ? null : parseFloat(catchForm.weight),
     };
-
     onChange({ catches: [...(data.catches || []), newCatch] });
-
     setCatchForm({
       species: "",
       length: "",
       weight: "",
+      time: "",
       bait: "",
       location: "",
       notes: "",
@@ -83,10 +79,8 @@ export default function Step4({ data, onChange }) {
       {
         text: "Löschen",
         style: "destructive",
-        onPress: () => {
-          const updated = data.catches.filter((c) => c._id !== id);
-          onChange({ catches: updated });
-        },
+        onPress: () =>
+          onChange({ catches: data.catches.filter((c) => c._id !== id) }),
       },
     ]);
   };
@@ -115,7 +109,7 @@ export default function Step4({ data, onChange }) {
         </View>
       </View>
 
-      {/* Länge & Gewicht */}
+      {/* Länge, Gewicht & Uhrzeit */}
       <View style={styles.row}>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Länge</Text>
@@ -139,6 +133,13 @@ export default function Step4({ data, onChange }) {
               setCatchForm((prev) => ({ ...prev, weight: v }))
             }
             placeholder="kg"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Uhrzeit</Text>
+          <TimePickerInput
+            value={catchForm.time}
+            onChange={(v) => setCatchForm((prev) => ({ ...prev, time: v }))}
           />
         </View>
       </View>
@@ -200,7 +201,14 @@ export default function Step4({ data, onChange }) {
         onPress={addCatch}
         disabled={!catchForm.species}
       >
-        <Text style={styles.addButtonText}>+ Fang hinzufügen</Text>
+        <Text
+          style={[
+            styles.addButtonText,
+            !catchForm.species && styles.addButtonTextDisabled,
+          ]}
+        >
+          + Fang hinzufügen
+        </Text>
       </Pressable>
 
       {/* Catch List */}
@@ -225,7 +233,7 @@ export default function Step4({ data, onChange }) {
         )}
       />
 
-      {/* Modal */}
+      {/* Species Selection Modal */}
       {modalOpen && (
         <Modal transparent animationType="none" visible={modalOpen}>
           <Pressable style={styles.modalOverlay} onPress={closeModal} />
@@ -291,34 +299,17 @@ export default function Step4({ data, onChange }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingVertical: 10,
-  },
-  title: {
-    ...Typography.h2,
-    color: Colors.primary,
-    marginBottom: 26,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  inputGroup: {
-    flex: 1,
-    marginBottom: 16,
-  },
-  label: {
-    ...Typography.body,
-    color: Colors.primary,
-    marginBottom: 4,
-  },
+  wrapper: { paddingVertical: 10 },
+  title: { ...Typography.h2, color: Colors.primary, marginBottom: 26 },
+  row: { flexDirection: "row", gap: 16 },
+  inputGroup: { flex: 1, marginBottom: 16 },
+  label: { ...Typography.body, color: Colors.primary, marginBottom: 6 },
   input: {
     borderWidth: 1,
     borderColor: Colors.gray,
     borderRadius: 8,
     padding: 10,
     backgroundColor: "#fff",
-    fontSize: 14,
     color: "#ccc",
   },
   selectInput: {
@@ -328,36 +319,28 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
   },
-  selectText: {
-    color: "#bbb",
-  },
+  selectText: { color: "#ccc" },
   toggleTaken: {
     borderWidth: 1,
     borderColor: Colors.primary,
     borderRadius: 8,
     padding: 10,
-    alignItems: "center",
     backgroundColor: "#fff",
+    alignItems: "center",
   },
-  toggleText: {
-    color: Colors.primary,
-    fontWeight: "500",
-  },
+  toggleText: { color: Colors.primary, fontWeight: "500" },
   addButton: {
-    backgroundColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.accent,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 12,
+    marginTop: 32,
     marginBottom: 10,
   },
-  addButtonText: {
-    ...Typography.button,
-    color: Colors.white,
-  },
-  addButtonDisabled: {
-    backgroundColor: Colors.gray,
-  },
+  addButtonDisabled: { borderColor: Colors.gray },
+  addButtonText: { ...Typography.button, color: Colors.accent },
+  addButtonTextDisabled: { ...Typography.button, color: Colors.gray },
   catchItem: {
     padding: 12,
     borderWidth: 1,
@@ -367,14 +350,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  catchText: {
-    color: Colors.secondary,
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
+  catchText: { color: Colors.secondary, fontSize: 16 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)" },
   modalContent: {
     maxHeight: "50%",
     backgroundColor: "#fff",
@@ -387,14 +364,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  modalItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  modalItemText: {
-    fontSize: 16,
-    color: Colors.primary,
-    textAlign: "center",
-  },
+  modalItem: { padding: 16, borderBottomWidth: 1, borderBottomColor: "#eee" },
+  modalItemText: { fontSize: 16, color: Colors.primary, textAlign: "center" },
 });
