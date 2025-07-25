@@ -11,7 +11,7 @@ export default function Step1({ data, onChange }) {
 
       <View style={styles.fieldRow}>
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Datum</Text>
+          <Text style={styles.label}>Datum *</Text>
           <DatePickerInput
             value={data.date}
             onChange={(v) => onChange({ date: v })}
@@ -19,7 +19,7 @@ export default function Step1({ data, onChange }) {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Gewässer</Text>
+          <Text style={styles.label}>Gewässer *</Text>
           <TextInput
             style={styles.input}
             value={data.water}

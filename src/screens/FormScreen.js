@@ -73,7 +73,7 @@ export default function FormScreen({ token }) {
 
   // Validation function to check if required fields are filled
   const validateForm = () => {
-    return form.date && form.water && form.target;
+    return form.date && form.water;
   };
 
   // Function to render each step based on the current step
