@@ -42,17 +42,18 @@ const CardItem = ({ data }) => {
             {largestCatch ? (
               <>
                 {/* Anzahl der Fische */}
+                <Ionicons
+                  name="fish-outline"
+                  size={18}
+                  color={Colors.accent}
+                  style={styles.fishIcon}
+                />
                 <Text style={styles.countText}>{catchCount}</Text>
                 {/* Größter Fisch */}
                 <View style={styles.catchTile}>
-                  <Ionicons
-                    name="fish-outline"
-                    size={16}
-                    color={Colors.secondary}
-                    style={styles.fishIcon}
-                  />
                   <Text style={styles.catchText}>
-                    {largestCatch.species}, {largestCatch.length} cm
+                    {largestCatch.species}
+                    {largestCatch.length && ", " + largestCatch.length + "cm"} 
                   </Text>
                 </View>
                 {/* Overflow-Indikator */}
@@ -160,9 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  fishIcon: {
-    marginRight: 6,
-  },
+  fishIcon: {},
   catchText: {
     ...Typography.caption,
     color: Colors.secondary,
