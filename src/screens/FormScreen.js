@@ -23,8 +23,8 @@ import { submitCardToBackend } from "../components/backendHandling/backendHandli
 
 export default function FormScreen({ token }) {
   const navigation = useNavigation();
-  const [step, setStep] = useState(1);
-  const totalSteps = 5;
+  const [step, setStep] = useState(1); // Current step in the form
+  const totalSteps = 5; // Total steps in the form
 
   const [form, setForm] = useState({
     water: "",
@@ -46,8 +46,10 @@ export default function FormScreen({ token }) {
     author: "demoUser",
   });
 
+  // Function to go back
   const cancel = () => navigation.goBack();
 
+  // Function to handle changes in the form fields
   const handleChange = (data) => {
     const numericKeys = [
       "temperature",
@@ -69,10 +71,22 @@ export default function FormScreen({ token }) {
     setForm((prev) => ({ ...prev, ...parsedData }));
   };
 
+  // Validation function to check if required fields are filled
+  const validateForm = () => {
+    return form.date && form.water && form.target;
+  };
+
+  // Function to render each step based on the current step
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Step1 data={form} onChange={handleChange} />;
+        return (
+          <Step1
+            data={form}
+            onChange={handleChange}
+            isFormValid={validateForm()} // Pass the validation status to Step1
+          />
+        );
       case 2:
         return <Step2 data={form} onChange={handleChange} />;
       case 3:
@@ -80,7 +94,13 @@ export default function FormScreen({ token }) {
       case 4:
         return <Step4 data={form} onChange={handleChange} />;
       case 5:
-        return <Step5 data={form} onChange={handleChange} />;
+        return (
+          <Step5
+            data={form}
+            onChange={handleChange}
+            isFormValid={validateForm()}
+          />
+        );
       default:
         return null;
     }
@@ -135,8 +155,20 @@ export default function FormScreen({ token }) {
         )}
         {step < totalSteps && (
           <TouchableOpacity
-            style={[styles.button, styles.buttonPrimary]}
-            onPress={() => setStep(step + 1)}
+            style={[
+              styles.button,
+              styles.buttonPrimary,
+              !validateForm() && styles.buttonDisabled, // Disable button if form is not valid
+            ]}
+            disabled={!validateForm()}
+            onPress={async () => {
+              if (!validateForm()) {
+                alert("Bitte füllen Sie Datum, Gewässer und Zielfisch aus!");
+                return;
+              }
+
+              setStep(step + 1);
+            }}
           >
             <Text style={styles.buttonPrimaryText}>Weiter</Text>
           </TouchableOpacity>
@@ -253,5 +285,8 @@ const styles = StyleSheet.create({
   buttonSecondaryText: {
     color: Colors.primary,
     ...Typography.button,
+  },
+  buttonDisabled: {
+    backgroundColor: "#ddd", // Disabled button color
   },
 });

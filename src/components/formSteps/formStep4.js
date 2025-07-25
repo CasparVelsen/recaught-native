@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 14,
-    color: "#333",
+    color: "#ccc",
   },
   selectInput: {
     borderWidth: 1,
