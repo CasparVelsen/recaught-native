@@ -169,6 +169,16 @@ const CardDetailsScreen = ({
     );
   };
 
+  const fieldLabels = {
+    species: "Art",
+    bait: "Fliege",
+    length: "Länge",
+    weight: "Gewicht",
+    time: "Uhrzeit",
+    location: "Ort",
+    notes: "Notizen",
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
@@ -258,24 +268,40 @@ const CardDetailsScreen = ({
         <View style={styles.section}>
           <Text style={styles.tileGroupTitle}>Fangstatistik</Text>
           {formData.catches?.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => {
-                setCatchForm({ ...item });
-                setModalState({ key: null, visible: true, catchIndex: index });
-              }}
-              style={[styles.catchBox, isEditing && styles.catchBoxActive]}
-            >
-              <View style={styles.catchWrapper}>
-                <Text style={styles.catchTitle}>
-                  {index + 1}. {item.species}
-                </Text>
-                <Text style={styles.catchLength}>{item.length} cm</Text>
-                <Text style={styles.catchStatus}>
-                  {item.taken ? "entnommen" : "released"}
-                </Text>
-              </View>
-            </TouchableOpacity>
+            <View key={index} style={styles.catchGroup}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (isEditing) {
+                    // Bearbeiten wie gehabt
+                    setCatchForm({ ...item });
+                    setModalState({
+                      key: null,
+                      visible: true,
+                      catchIndex: index,
+                    });
+                  } else {
+                    toggleExpand(index);
+                  }
+                }}
+                style={[styles.catchBox, isEditing && styles.catchBoxActive]}
+              >
+                <View style={styles.catchWrapper}>
+                  <Text style={styles.catchTitle}>
+                    {index + 1}. {item.species}
+                  </Text>
+                  <Text style={styles.catchLength}>{item.length} cm</Text>
+                  <Text style={styles.catchStatus}>
+                    {item.taken ? "entnommen" : "released"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {expandedIndex === index && item.time && (
+                <View style={styles.catchExpanded}>
+                  {/* deine Detail-Zeilen */}
+                </View>
+              )}
+            </View>
           ))}
 
           <Field label="gefangen" value={formData.catches?.length} />
@@ -354,38 +380,98 @@ const CardDetailsScreen = ({
                 { transform: [{ translateY: slideAnim }] },
               ]}
             >
-              {modalState.catchIndex !== null && catchForm ? (
-                <>
-                  {[
-                    "species",
-                    "length",
-                    "weight",
-                    "bait",
-                    "location",
-                    "notes",
-                  ].map((field) => (
-                    <TextInput
-                      key={field}
-                      style={styles.modalInput}
-                      placeholder={field}
-                      value={catchForm?.[field]?.toString() || ""}
-                      onChangeText={(text) =>
-                        setCatchForm((prev) => ({ ...prev, [field]: text }))
-                      }
-                    />
-                  ))}
+              {/* Header mit Abbrechen (X) und Titel */}
+              <View style={styles.modalHeader}>
+                <Pressable
+                  onPress={() => {
+                    setModalState({
+                      key: null,
+                      visible: false,
+                      catchIndex: null,
+                    });
+                    setCatchForm(null);
+                  }}
+                  style={styles.modalClose}
+                >
+                  <Ionicons name="close" size={24} color={Colors.gray} />
+                </Pressable>
+                <Text style={styles.modalTitle}>Fang bearbeiten</Text>
+                <View style={styles.modalSpacer} />
+              </View>
+
+              <ScrollView>
+                {/* Zweier‑Reihen mit deutschem Placeholder */}
+                {[
+                  ["species", "bait"],
+                  ["length", "weight"],
+                  ["time", "location"],
+                  ["notes", null],
+                ].map((pair, row) => (
+                  <View key={row} style={styles.modalRow}>
+                    {pair.map((field, idx) =>
+                      field ? (
+                        <TextInput
+                          key={field}
+                          style={[styles.modalInput, styles.modalInputHalf]}
+                          placeholder={fieldLabels[field]}
+                          value={catchForm[field]?.toString() || ""}
+                          onChangeText={(text) =>
+                            setCatchForm((prev) => ({ ...prev, [field]: text }))
+                          }
+                        />
+                      ) : (
+                        <View key={idx} style={styles.modalInputHalf} />
+                      )
+                    )}
+                  </View>
+                ))}
+
+                {/* Entnommen‐Toggle */}
+                <TouchableOpacity
+                  style={styles.toggleTaken}
+                  onPress={() =>
+                    setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
+                  }
+                >
+                  <Text style={styles.modalText}>
+                    {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Buttons nebeneinander */}
+                <View style={styles.modalButtonRow}>
+                  {/* Papierkorb zum Löschen */}
                   <TouchableOpacity
-                    style={styles.toggleTaken}
-                    onPress={() =>
-                      setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
-                    }
+                    style={[
+                      styles.modalButton,
+                      { borderWidth: 1, borderColor: Colors.accent },
+                    ]}
+                    onPress={() => {
+                      const updated = formData.catches.filter(
+                        (_, i) => i !== modalState.catchIndex
+                      );
+                      setFormData((prev) => ({ ...prev, catches: updated }));
+                      setModalState({
+                        key: null,
+                        visible: false,
+                        catchIndex: null,
+                      });
+                      setCatchForm(null);
+                    }}
                   >
-                    <Text style={styles.modalText}>
-                      {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
+                    <Text
+                      style={(styles.modalButtonText, { color: Colors.accent })}
+                    >
+                      Löschen
                     </Text>
                   </TouchableOpacity>
+
+                  {/* Speichern */}
                   <TouchableOpacity
-                    style={styles.saveButton}
+                    style={[
+                      styles.modalButton,
+                      { borderWidth: 1, borderColor: Colors.primary },
+                    ]}
                     onPress={() => {
                       const updated = [...formData.catches];
                       updated[modalState.catchIndex] = { ...catchForm };
@@ -398,44 +484,16 @@ const CardDetailsScreen = ({
                       setCatchForm(null);
                     }}
                   >
-                    <Text style={styles.modalText}>Speichern</Text>
-                  </TouchableOpacity>
-                </>
-              ) : modalState.key !== null ? (
-                <FlatList
-                  data={selectionOptions[modalState.key]}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <Pressable
-                      style={styles.modalItem}
-                      onPress={() => {
-                        handleChange(modalState.key, item);
-                        setModalState({
-                          key: null,
-                          visible: false,
-                          catchIndex: null,
-                        });
-                      }}
+                    <Text
+                      style={
+                        (styles.modalButtonText, { color: Colors.primary })
+                      }
                     >
-                      <Text style={styles.modalText}>{item}</Text>
-                    </Pressable>
-                  )}
-                />
-              ) : null}
-
-              <Pressable
-                onPress={() => {
-                  setModalState({
-                    key: null,
-                    visible: false,
-                    catchIndex: null,
-                  });
-                  setCatchForm(null);
-                }}
-                style={styles.modalCancel}
-              >
-                <Text style={styles.modalText}>Abbrechen</Text>
-              </Pressable>
+                      Speichern
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </Animated.View>
           </View>
         </Modal>
@@ -598,7 +656,15 @@ const styles = StyleSheet.create({
   },
   catchExpanded: {
     marginTop: 10,
+    gap: 4,
   },
+  catchDetailRow: { flexDirection: "row" },
+  detailText: {
+    color: Colors.primary,
+    ...Typography.small.fontSize,
+    width: "20%",
+  },
+  detailValue: { color: Colors.secondary },
   editButtonContainer: {
     padding: 16,
     borderTopWidth: 1,
@@ -656,7 +722,59 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     backgroundColor: Colors.white,
   },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  modalTitle: {
+    ...Typography.h3,
+    color: Colors.primary,
+  },
+  modalSpacer: {
+    width: 24, // damit der Titel wirklich mittig bleibt
+  },
+  modalLabel: {
+    ...Typography.subtitle,
+    color: Colors.primary,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  modalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  modalInputHalf: {
+    width: "48%",
+  },
 
+  modalButtonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginHorizontal: 6,
+  },
+  modalButtonText: {
+    ...Typography.button,
+  },
+
+  deleteCatchIcon: {
+    alignSelf: "center",
+    marginVertical: 12,
+  },
   toggleTaken: {
     paddingVertical: 10,
     alignItems: "center",
@@ -683,5 +801,16 @@ const styles = StyleSheet.create({
     color: Colors.white,
     ...Typography.body,
     fontWeight: "bold",
+  },
+  deleteCatchButton: {
+    marginTop: 6,
+    backgroundColor: Colors.danger || "#D9534F",
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  deleteCatchText: {
+    ...Typography.body,
+    color: Colors.white,
   },
 });
