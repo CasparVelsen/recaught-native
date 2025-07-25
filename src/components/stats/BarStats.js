@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import SkiaBarChart from "../charts/SkiaBarChart";
 
+import { translateValue } from "../../../assets/language/translatedValue";
+
 const OPTIONS = [
   { key: "weather", label: "Wetter" },
   { key: "moon", label: "Mondphase" },
@@ -18,20 +20,91 @@ const OPTIONS = [
   { key: "waterlevel", label: "Wasserstand" },
 ];
 
+const normalizationMap = {
+  moon: {
+    "increasing moon": "zunehmend",
+    zunehmend: "zunehmend",
+    "full moon": "vollmond",
+    "new moon": "neumond",
+    "waning moon": "abnehmend",
+    abnehmend: "abnehmend",
+    "": "", // leer bleiben, wird später gefiltert
+  },
+  // weitere Normalisierungen hier falls nötig
+};
+
+function normalizeValue(type, value) {
+  if (!value || !type) return value;
+  const dict = normalizationMap[type];
+  if (!dict) return value;
+
+  const key = value.toString().toLowerCase().trim();
+  return dict[key] || value;
+}
+
 function aggregateData(stats, optionKey) {
   if (!stats || !Array.isArray(stats[optionKey])) return [];
-  return stats[optionKey].map(([name, fishes]) => ({ name, fishes }));
+
+  const countMap = {};
+
+  stats[optionKey].forEach(([rawName, fishes]) => {
+    if (
+      rawName === 0 ||
+      rawName === "" ||
+      rawName === null ||
+      rawName === undefined ||
+      fishes <= 0
+    )
+      return;
+
+    const normalizedName = translateValue(optionKey, rawName);
+    countMap[normalizedName] = (countMap[normalizedName] || 0) + fishes;
+  });
+
+  return Object.entries(countMap).map(([name, fishes]) => ({
+    name,
+    fishes,
+  }));
 }
 
 const BarStats = ({ stats = {} }) => {
   const [selectedKey, setSelectedKey] = useState(OPTIONS[0].key);
 
+  // Filter Optionen nur auf solche mit Daten > 0
+  const availableOptions = useMemo(() => {
+    return OPTIONS.filter(({ key }) => {
+      const dataForKey = stats[key];
+      if (!Array.isArray(dataForKey)) return false;
+      return dataForKey.some(([_, fishes]) => fishes > 0);
+    });
+  }, [stats]);
+
+  // Falls der aktuelle selectedKey nicht mehr gültig ist, setze ihn auf ersten verfügbaren
+  useEffect(() => {
+    if (
+      selectedKey === "" ||
+      !availableOptions.find((opt) => opt.key === selectedKey)
+    ) {
+      setSelectedKey(availableOptions[0]?.key || "");
+    }
+  }, [availableOptions, selectedKey]);
+
   const selectedLabel =
-    OPTIONS.find((opt) => opt.key === selectedKey)?.label || "";
+    availableOptions.find((opt) => opt.key === selectedKey)?.label || "";
 
   const aggregatedData = useMemo(() => {
     return aggregateData(stats, selectedKey);
   }, [stats, selectedKey]);
+
+  if (availableOptions.length === 0) {
+    return (
+      <View style={[styles.container, { padding: 16 }]}>
+        <Text style={{ color: Colors.primary }}>
+          Keine Statistik-Daten verfügbar.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -40,7 +113,7 @@ const BarStats = ({ stats = {} }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.optionsContainer}
       >
-        {OPTIONS.map(({ key, label }) => {
+        {availableOptions.map(({ key, label }) => {
           const selected = key === selectedKey;
           return (
             <TouchableOpacity
@@ -68,13 +141,17 @@ const BarStats = ({ stats = {} }) => {
         <Text style={styles.title}>{selectedLabel}</Text>
       </View>
 
-      <SkiaBarChart data={aggregatedData} label={selectedLabel} />
+      <SkiaBarChart
+        data={aggregatedData}
+        label={selectedLabel}
+        field={selectedKey}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { paddingVertical: 10 },
+  container: { marginTop: 52 },
   optionsContainer: {
     paddingHorizontal: 16,
     gap: 6,

@@ -95,6 +95,8 @@ const StatsScreen = ({ token, profile }) => {
     return getEnvironmentStats(filteredCards);
   }, [filteredCards]);
 
+  console.log(stats);
+
   const allCatches = useMemo(() => {
     return filteredCards.flatMap((card) => card.catches || []);
   }, [filteredCards]);
@@ -156,10 +158,10 @@ const StatsScreen = ({ token, profile }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerBlock}>
         <View>
-          <Text style={styles.welcome}>Tight lines,</Text>
-          <Text style={styles.header}>
-            {profile?.firstname || profile?.username || "User"}
+          <Text style={styles.welcome}>
+            {profile?.firstname || profile?.username || "User"}'s
           </Text>
+          <Text style={styles.header}>Statistiken</Text>
         </View>
         <View style={styles.filterGroup}>
           <TimeFilter
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray,
+    borderBottomColor: "#eee",
     alignItems: "flex-end",
   },
   welcome: {
@@ -362,6 +364,7 @@ const styles = StyleSheet.create({
     ...Typography.h3,
     color: Colors.primary,
     marginBottom: 12,
+    textAlign: "center",
   },
   tileItem: {
     flexDirection: "row",

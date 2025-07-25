@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: Colors.primary,
-    backgroundColor: Colors.white,
+    borderColor: Colors.secondary,
+    backgroundColor: "#f8f8f8",
   },
 
   header: {
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRightWidth: 1,
-    borderRightColor: Colors.primary,
+    borderRightColor: Colors.secondary,
     paddingHorizontal: 10,
     paddingRight: 20,
     alignSelf: "stretch",

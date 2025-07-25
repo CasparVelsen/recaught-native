@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -22,33 +22,58 @@ const LineStats = ({ stats }) => {
   const [hoverPoint, setHoverPoint] = useState(null);
   const [selectedKey, setSelectedKey] = useState("temperature");
 
+  // Filter nur Optionen mit vorhandenen Daten
+  const availableOptions = useMemo(() => {
+    return OPTIONS.filter(({ key }) => {
+      const data = stats?.[key];
+      return Array.isArray(data) && data.length > 0;
+    });
+  }, [stats]);
+
+  // Falls selectedKey nicht mehr vorhanden, setze auf ersten verfügbaren
+  useEffect(() => {
+    if (!availableOptions.find((opt) => opt.key === selectedKey)) {
+      setSelectedKey(availableOptions[0]?.key || "");
+      setHoverPoint(null);
+    }
+  }, [availableOptions, selectedKey]);
+
+  const data = stats?.[selectedKey] ?? [];
+  const selectedLabel =
+    availableOptions.find((opt) => opt.key === selectedKey)?.label || "";
+
   const handlePointChange = useCallback((point) => {
     setHoverPoint(point);
   }, []);
 
-  const data = stats?.[selectedKey] ?? [];
-  const selectedLabel =
-    OPTIONS.find((opt) => opt.key === selectedKey)?.label || "";
+  if (availableOptions.length === 0) {
+    return (
+      <View style={[styles.container, { padding: 16 }]}>
+        <Text style={{ color: Colors.primary }}>
+          Keine Linien-Daten verfügbar.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Options als ScrollView mit runden Buttons */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.optionsContainer}
       >
-        {OPTIONS.map((option) => {
-          const selected = option.key === selectedKey;
+        {availableOptions.map(({ key, label }) => {
+          const selected = key === selectedKey;
           return (
             <TouchableOpacity
-              key={option.key}
+              key={key}
               style={[
                 styles.optionButton,
                 selected && styles.optionButtonSelected,
               ]}
               onPress={() => {
-                setSelectedKey(option.key);
+                setSelectedKey(key);
                 setHoverPoint(null);
               }}
             >
@@ -58,7 +83,7 @@ const LineStats = ({ stats }) => {
                   selected && styles.optionTextSelected,
                 ]}
               >
-                {option.label}
+                {label}
               </Text>
             </TouchableOpacity>
           );
@@ -76,7 +101,7 @@ const LineStats = ({ stats }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { paddingVertical: 10 },
+  container: { marginTop: 24 },
   optionsContainer: {
     paddingHorizontal: 16,
     gap: 6,
