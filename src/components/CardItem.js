@@ -34,6 +34,11 @@ const CardItem = ({ data }) => {
         {/* Middle: Infos */}
         <View style={styles.info}>
           <View style={styles.iconRow}>
+            <Ionicons
+              name="location-outline"
+              size={18}
+              color={Colors.primary}
+            />
             <Text style={styles.iconText}>{data.water}</Text>
           </View>
 
@@ -42,12 +47,7 @@ const CardItem = ({ data }) => {
             {largestCatch ? (
               <>
                 {/* Anzahl der Fische */}
-                <Ionicons
-                  name="fish-outline"
-                  size={18}
-                  color={Colors.accent}
-                  style={styles.fishIcon}
-                />
+                <Ionicons name="fish-outline" size={18} color={Colors.accent} />
                 <Text style={styles.countText}>{catchCount}</Text>
                 {/* Größter Fisch */}
                 <View style={styles.catchTile}>
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   iconText: {
+    marginLeft: 4,
     color: Colors.primary,
     ...Typography.subtitle,
   },
@@ -161,7 +162,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  fishIcon: {},
   catchText: {
     ...Typography.caption,
     color: Colors.secondary,
