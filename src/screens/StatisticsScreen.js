@@ -297,6 +297,7 @@ const styles = StyleSheet.create({
   },
   headerBlock: {
     padding: 16,
+    paddingTop: 0,
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
@@ -445,12 +446,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 6,
     gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    // Shadow (Android)
-    elevation: 4,
   },
   modalListCount: {
     ...Typography.body,
