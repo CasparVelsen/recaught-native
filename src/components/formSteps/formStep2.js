@@ -1,4 +1,3 @@
-// components/formSteps/formStep2.js
 import React, { useState, useRef } from "react";
 import {
   View,
@@ -9,10 +8,14 @@ import {
   FlatList,
   Animated,
   StyleSheet,
+  Alert,
 } from "react-native";
-import Colors from "../../../assets/colors/Colors";
-import Typography from "../../../assets/fonts/Typography";
-import { selectionOptions } from "../../utils/selectionOptions";
+import * as Location from "expo-location";
+import Colors from "../../../assets/colors/Colors"; // Importiere deine Farben
+import Typography from "../../../assets/fonts/Typography"; // Importiere deine Typografie
+import { selectionOptions } from "../../utils/selectionOptions"; // Dein Auswahloptionen-Modul
+
+const API_BASE_URL = "http://10.116.131.241:3000"; // Stelle sicher, dass dies die richtige IP-Adresse des Servers ist
 
 export default function Step2({ data, onChange }) {
   const [modalState, setModalState] = useState({ key: null, visible: false });
@@ -40,6 +43,48 @@ export default function Step2({ data, onChange }) {
   const handleSelection = (value) => {
     onChange({ [modalState.key]: value });
     closeModal();
+  };
+
+  // Funktion, um Wetterdaten vom Server zu holen
+  const fetchWeatherData = async () => {
+    try {
+      // Berechtigungen für Geolocation anfordern
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Fehler", "Standortberechtigungen wurden nicht gewährt.");
+        return;
+      }
+
+      // Geolocation abrufen
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      console.log("Standortdaten:", { latitude, longitude });
+
+      // API-Anfrage an den Backend-Server
+      const response = await fetch(`${API_BASE_URL}/api/external-weather`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude,
+          longitude,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Fehler beim Abrufen der Wetterdaten");
+      }
+
+      // Die zurückgegebenen Wetterdaten an das Eltern-Component weitergeben
+      onChange(data);
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Wetterdaten:", error);
+      Alert.alert("Fehler", `Fehler: ${error.message}`);
+    }
   };
 
   return (
@@ -112,6 +157,7 @@ export default function Step2({ data, onChange }) {
           />
         </View>
       </View>
+
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Mondphase</Text>
         <Pressable style={styles.selectInput} onPress={() => openModal("moon")}>
@@ -120,6 +166,13 @@ export default function Step2({ data, onChange }) {
           </Text>
         </Pressable>
       </View>
+
+      {/* Button zum Abrufen der Wetterdaten */}
+      <Pressable style={styles.weatherButton} onPress={fetchWeatherData}>
+        <Text style={styles.weatherButtonText}>
+          Aktuelle Wetterdaten abrufen
+        </Text>
+      </Pressable>
 
       {modalState.visible && (
         <Modal transparent animationType="none" visible={modalState.visible}>
@@ -217,5 +270,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.primary,
     textAlign: "center",
+  },
+  button: {
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+  },
+  weatherButton: {
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  weatherButtonText: {
+    color: Colors.accent,
+    textAlign: "center",
+    ...Typography.button,
   },
 });
