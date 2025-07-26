@@ -62,8 +62,6 @@ const StatsScreen = ({ token, profile }) => {
     return getEnvironmentStats(filteredCards);
   }, [filteredCards]);
 
-  console.log(stats);
-
   const allCatches = useMemo(() => {
     return filteredCards.flatMap((card) => card.catches || []);
   }, [filteredCards]);
@@ -209,7 +207,6 @@ const StatsScreen = ({ token, profile }) => {
         {stats && <LineStats stats={stats} />}
         {stats && <BarStats stats={stats} />}
       </ScrollView>
-
 
       <StatsListModal
         visible={modalVisible}
