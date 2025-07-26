@@ -64,6 +64,10 @@ const buildSmoothPath = (points) => {
 };
 
 const buildSmoothAreaPath = (points) => {
+  if (points.length === 0) {
+    return Skia.Path.Make();
+  }
+
   const path = buildSmoothPath(points);
   path.lineTo(points[points.length - 1].x, CHART_HEIGHT);
   path.lineTo(points[0].x, CHART_HEIGHT);
@@ -94,8 +98,6 @@ const SkiaLineChart = (props) => {
   const color = props.color || Colors.primary;
   const step = props.step ?? 1;
   const onPointChange = props.onPointChange;
-
-  if (data.length === 0) return null;
 
   // Memoisiere containerWidth für Stabilität
   const { width: rawWidth } = useWindowDimensions();
@@ -148,6 +150,8 @@ const SkiaLineChart = (props) => {
       runOnJS(updateMarker)(event.x);
     },
   });
+
+  if (points.length === 0) return null;
 
   return (
     <View style={styles.wrapper}>
