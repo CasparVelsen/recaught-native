@@ -20,13 +20,15 @@ const CatchesDetailsScreen = () => {
 
   const allCatches = useMemo(() => {
     if (!cards) return [];
-    return cards.flatMap((card) =>
-      (card.catches || []).map((catchItem) => ({
-        ...catchItem,
-        water: card.water,
-        date: card.date,
-      }))
-    );
+    return cards
+      .flatMap((card) =>
+        (card.catches || []).map((catchItem) => ({
+          ...catchItem,
+          water: card.water,
+          date: card.date,
+        }))
+      )
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // 🆕 Neueste zuerst
   }, [cards]);
 
   const [selectedSpecies, setSelectedSpecies] = useState("");
