@@ -5,8 +5,7 @@ import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
 import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
 import CardItem from "../components/CardItem";
-
-const API_BASE_URL = "http://10.116.131.241:3000";
+import { API_BASE_URL } from "../config";
 
 const HomeScreen = ({ token, profile }) => {
   const [cards, setCards] = useState([]);

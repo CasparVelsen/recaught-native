@@ -18,11 +18,11 @@ import {
   saveCardToBackend,
   deleteCardFromBackend,
 } from "../components/backendHandling/backendHandling";
+import { API_BASE_URL } from "../config";
 import CatchEditModal from "../components/modals/CatchEditModal";
 import InputPicker from "../components/InputPicker";
 import { selectionOptions } from "../utils/selectionOptions";
 
-const API_BASE_URL = "http://10.116.131.241:3000";
 
 const CardDetailsScreen = ({
   route,

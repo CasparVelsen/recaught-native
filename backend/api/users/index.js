@@ -1,6 +1,6 @@
 import dbConnect from "../../lib/dbConnect.js";
 import User from "../../models/User.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import loginHandler from "./login.js";
 
 async function handler(request, response) {

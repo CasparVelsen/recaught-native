@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dbConnect from "../../lib/dbConnect.js";
 import User from "../../models/User.js";

@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://10.116.131.241:3000";
+import { API_BASE_URL } from "../../config";
 
 export const saveCardToBackend = async (token, formData) => {
   try {

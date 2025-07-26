@@ -13,6 +13,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
+import { API_BASE_URL } from "../config";
 
 const initialForm = {
   firstname: "",
@@ -21,7 +22,6 @@ const initialForm = {
   password: "",
 };
 
-const API_BASE_URL = "http://10.116.131.241:3000";
 
 export default function SignupPage({ onLoginSuccess }) {
   const [form, setForm] = useState(initialForm);

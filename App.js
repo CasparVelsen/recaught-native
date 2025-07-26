@@ -12,9 +12,9 @@ import CardDetailsScreen from "./src/screens/CardDetailsScreen";
 import CatchesDetailsScreen from "./src/screens/CatchesDetailsScreen";
 import FormScreen from "./src/screens/FormScreen";
 import Colors from "./assets/colors/Colors";
+import { API_BASE_URL } from "./src/config";
 
 const Stack = createNativeStackNavigator();
-const API_BASE_URL = "http://10.116.131.241:3000";
 
 export default function App() {
   const [token, setToken] = useState(null);
