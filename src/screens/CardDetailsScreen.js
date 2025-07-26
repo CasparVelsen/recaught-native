@@ -134,7 +134,7 @@ const CardDetailsScreen = ({
         {isEditableText ? (
           <TextInput
             style={styles.tileValue}
-            value={formData[key]?.toString() || ""}
+            value={formData[key]?.toString() || "Bearbeiten"}
             onChangeText={(text) => handleChange(key, text)}
           />
         ) : isSelectable ? (
@@ -514,6 +514,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.primary,
     marginBottom: 4,
+    flexShrink: 1,
   },
   tilePicker: {
     marginBottom: 4,
