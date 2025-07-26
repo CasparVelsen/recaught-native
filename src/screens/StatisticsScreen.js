@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,10 +6,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  FlatList,
-  Pressable,
-  Animated,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
@@ -24,6 +14,7 @@ import { TimeFilter, WaterFilter } from "../components/filter/CardsFilters";
 import LineStats from "../components/stats/LineStats";
 import BarStats from "../components/stats/BarStats";
 import { getEnvironmentStats } from "../utils/stats";
+import StatsListModal from "../components/modals/StatsListModal";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
 
@@ -34,30 +25,6 @@ const StatsScreen = ({ token, profile }) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState(null);
-
-  const [overlayVisible, setOverlayVisible] = useState(false);
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-
-  // Overlay einblenden mit Fade
-  const showOverlay = () => {
-    setOverlayVisible(true);
-    Animated.timing(overlayOpacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  // Overlay ausblenden mit Fade
-  const hideOverlay = () => {
-    Animated.timing(overlayOpacity, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setOverlayVisible(false);
-    });
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -122,11 +89,9 @@ const StatsScreen = ({ token, profile }) => {
   const openModal = (type) => {
     setModalType(type);
     setModalVisible(true);
-    showOverlay();
   };
 
   const closeModal = () => {
-    hideOverlay();
     setModalVisible(false);
     setModalType(null);
   };
@@ -134,16 +99,6 @@ const StatsScreen = ({ token, profile }) => {
   // Vorschau: Top 6 Items
   const topSpecies = speciesStats.slice(0, 6);
   const topBaits = baitStats.slice(0, 6);
-
-  const renderListItem = ({ item }) => {
-    const [name, count] = item;
-    return (
-      <View style={styles.modalListItem}>
-        <Text style={styles.modalListCount}>{count}</Text>
-        <Text style={styles.modalListName}>{name}</Text>
-      </View>
-    );
-  };
 
   const modalTitle = modalType === "species" ? "Fangstatistik" : "Fliegendose";
   const modalData = modalType === "species" ? speciesStats : baitStats;
@@ -255,35 +210,13 @@ const StatsScreen = ({ token, profile }) => {
         {stats && <BarStats stats={stats} />}
       </ScrollView>
 
-      {overlayVisible && (
-        <Animated.View
-          style={[styles.modalOverlay, { opacity: overlayOpacity }]}
-        >
-          <Pressable style={{ flex: 1 }} onPress={closeModal} />
-        </Animated.View>
-      )}
 
-      {/* Modal */}
-      <Modal
+      <StatsListModal
         visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalContainer}>
-          <Pressable style={styles.modalOverlay} onPress={closeModal} />
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {modalType === "species" ? "Fangstatistik" : "Fliegendose"}
-            </Text>
-            <FlatList
-              data={modalType === "species" ? speciesStats : baitStats}
-              keyExtractor={(item) => item[0]}
-              renderItem={renderListItem}
-            />
-          </View>
-        </View>
-      </Modal>
+        title={modalTitle}
+        data={modalData}
+        onClose={closeModal}
+      />
     </SafeAreaView>
   );
 };
@@ -406,56 +339,5 @@ const styles = StyleSheet.create({
   empty: {
     fontStyle: "italic",
     color: "#888",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  },
-  modalOverlay: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    zIndex: 10,
-  },
-  modalContent: {
-    maxHeight: "60%",
-    width: "80%", // Breite begrenzt und zentriert
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    zIndex: 20,
-    elevation: 5, // Für Android Schatten
-    shadowColor: "#000", // Für iOS Schatten
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalTitle: {
-    ...Typography.h3,
-    color: Colors.primary,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  modalListItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 6,
-    gap: 12,
-  },
-  modalListCount: {
-    ...Typography.body,
-    color: Colors.secondary,
-    minWidth: 30,
-    textAlign: "right",
-  },
-  modalListName: {
-    ...Typography.body,
-    color: Colors.primary,
-    flexShrink: 1,
   },
 });

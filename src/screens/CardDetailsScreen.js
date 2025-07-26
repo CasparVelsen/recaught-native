@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   View,
@@ -8,11 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  Modal,
-  FlatList,
-  Pressable,
-  Animated,
-  Easing,
   useFocusEffect,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -23,6 +18,7 @@ import {
   saveCardToBackend,
   deleteCardFromBackend,
 } from "../components/backendHandling/backendHandling";
+import CatchEditModal from "../components/modals/CatchEditModal";
 
 const selectionOptions = {
   weather: ["sonnig", "bewölkt", "regnerisch", "windig", "stürmisch", "Schnee"],
@@ -61,7 +57,6 @@ const CardDetailsScreen = ({
   });
   const [catchForm, setCatchForm] = useState(null);
 
-  const slideAnim = useRef(new Animated.Value(300)).current;
 
   const toggleExpand = (index) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
@@ -127,18 +122,6 @@ const CardDetailsScreen = ({
     }).format(date);
   };
 
-  useEffect(() => {
-    if (modalState.visible) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 250,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }).start();
-    } else {
-      slideAnim.setValue(300);
-    }
-  }, [modalState.visible]);
 
   const renderTile = (label, value, key) => {
     if (!value && value !== 0 && !isEditing) return null;
@@ -394,154 +377,33 @@ const CardDetailsScreen = ({
         )}
       </View>
 
-      {modalState.visible && (
-        <Modal transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                { transform: [{ translateY: slideAnim }] },
-              ]}
-            >
-              {/* Header mit Abbrechen (X) und Titel */}
-              <View style={styles.modalHeader}>
-                <Pressable
-                  onPress={() => {
-                    setModalState({
-                      key: null,
-                      visible: false,
-                      catchIndex: null,
-                    });
-                    setCatchForm(null);
-                  }}
-                  style={styles.modalClose}
-                >
-                  <Ionicons name="close" size={24} color={Colors.gray} />
-                </Pressable>
-                <Text style={styles.modalTitle}>Fang bearbeiten</Text>
-                <View style={styles.modalSpacer} />
-              </View>
-
-              <ScrollView>
-                {/* Zweier‑Reihen mit deutschem Placeholder */}
-                {[
-                  ["species", "bait"],
-                  ["length", "weight"],
-                  ["time", "location"],
-                ].map((pair, row) => (
-                  <View key={row} style={styles.modalRow}>
-                    {pair.map((field, idx) =>
-                      field ? (
-                        <View key={field} style={styles.modalInputWrapper}>
-                          {/* Hier kommt der Input-Titel */}
-                          <Text style={styles.inputTitle}>
-                            {fieldLabels[field]}
-                          </Text>
-
-                          {/* Dein TextInput */}
-                          <TextInput
-                            style={[styles.modalInput, styles.modalInputHalf]}
-                            placeholder={fieldLabels[field]}
-                            value={catchForm[field]?.toString() || ""}
-                            onChangeText={(text) =>
-                              setCatchForm((prev) => ({
-                                ...prev,
-                                [field]: text,
-                              }))
-                            }
-                          />
-                        </View>
-                      ) : (
-                        <View key={idx} style={styles.modalInputHalf} />
-                      )
-                    )}
-                  </View>
-                ))}
-
-                <View>
-                  <Text style={styles.inputTitle}>Notizen</Text>
-                  <TextInput
-                    key={fieldLabels.notes}
-                    style={styles.modalInput}
-                    placeholder={fieldLabels.notes}
-                    value={catchForm.notes?.toString() || ""}
-                    onChangeText={(text) =>
-                      setCatchForm((prev) => ({ ...prev, species: text }))
-                    }
-                  />
-                </View>
-
-                {/* Entnommen‐Toggle */}
-                <TouchableOpacity
-                  style={styles.toggleTaken}
-                  onPress={() =>
-                    setCatchForm((prev) => ({ ...prev, taken: !prev.taken }))
-                  }
-                >
-                  <Text style={styles.modalText}>
-                    {catchForm.taken ? "✓ Entnommen" : "✗ Zurückgesetzt"}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Buttons nebeneinander */}
-                <View style={styles.modalButtonRow}>
-                  {/* Papierkorb zum Löschen */}
-                  <TouchableOpacity
-                    style={[
-                      styles.modalButton,
-                      { borderWidth: 1, borderColor: Colors.accent },
-                    ]}
-                    onPress={() => {
-                      const updated = formData.catches.filter(
-                        (_, i) => i !== modalState.catchIndex
-                      );
-                      setFormData((prev) => ({ ...prev, catches: updated }));
-                      setModalState({
-                        key: null,
-                        visible: false,
-                        catchIndex: null,
-                      });
-                      setCatchForm(null);
-                    }}
-                  >
-                    <Text
-                      style={(styles.modalButtonText, { color: Colors.accent })}
-                    >
-                      Löschen
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Speichern */}
-                  <TouchableOpacity
-                    style={[
-                      styles.modalButton,
-                      { borderWidth: 1, borderColor: Colors.primary },
-                    ]}
-                    onPress={() => {
-                      const updated = [...formData.catches];
-                      updated[modalState.catchIndex] = { ...catchForm };
-                      setFormData((prev) => ({ ...prev, catches: updated }));
-                      setModalState({
-                        key: null,
-                        visible: false,
-                        catchIndex: null,
-                      });
-                      setCatchForm(null);
-                    }}
-                  >
-                    <Text
-                      style={
-                        (styles.modalButtonText, { color: Colors.primary })
-                      }
-                    >
-                      Speichern
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </Animated.View>
-          </View>
-        </Modal>
+      {modalState.visible && catchForm && (
+        <CatchEditModal
+          visible={modalState.visible}
+          catchForm={catchForm}
+          onChange={(field, value) =>
+            setCatchForm((prev) => ({ ...prev, [field]: value }))
+          }
+          onClose={() => {
+            setModalState({ key: null, visible: false, catchIndex: null });
+            setCatchForm(null);
+          }}
+          onDelete={() => {
+            const updated = formData.catches.filter(
+              (_, i) => i !== modalState.catchIndex
+            );
+            setFormData((prev) => ({ ...prev, catches: updated }));
+            setModalState({ key: null, visible: false, catchIndex: null });
+            setCatchForm(null);
+          }}
+          onSave={() => {
+            const updated = [...formData.catches];
+            updated[modalState.catchIndex] = { ...catchForm };
+            setFormData((prev) => ({ ...prev, catches: updated }));
+            setModalState({ key: null, visible: false, catchIndex: null });
+            setCatchForm(null);
+          }}
+        />
       )}
     </SafeAreaView>
   );
@@ -735,115 +597,6 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     color: Colors.accent,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    marginHorizontal: 30,
-    borderRadius: 10,
-    padding: 20,
-    maxHeight: "60%",
-  },
-  modalItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray,
-  },
-  modalCancel: {
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  modalText: {
-    ...Typography.body,
-    textAlign: "center",
-    color: "#ccc",
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: Colors.gray,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    ...Typography.body,
-    color: "#ccc",
-    backgroundColor: Colors.white,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  modalClose: {
-    padding: 4,
-  },
-  modalTitle: {
-    ...Typography.h3,
-    color: Colors.primary,
-  },
-  modalSpacer: {
-    width: 24, // damit der Titel wirklich mittig bleibt
-  },
-  modalLabel: {
-    ...Typography.subtitle,
-    color: Colors.primary,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  modalRow: {
-    flexDirection: "row",
-    marginBottom: 8,
-    gap: 16,
-    // ...
-  },
-  modalInputWrapper: {
-    flex: 1,
-  },
-  inputTitle: {
-    ...Typography.body,
-    marginBottom: 4,
-    color: Colors.primary,
-  },
-  modalInputHalf: {
-    width: "100%",
-  },
-
-  modalButtonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  modalButton: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 6,
-  },
-  modalButtonText: {
-    ...Typography.button,
-  },
-
-  deleteCatchIcon: {
-    alignSelf: "center",
-    marginVertical: 12,
-  },
-  toggleTaken: {
-    paddingVertical: 10,
-    alignItems: "center",
-    marginBottom: 12,
-    borderRadius: 6,
-    backgroundColor: Colors.grayLight,
-  },
-  saveButtonText: {
-    color: Colors.accent,
-    ...Typography.body,
-    textAlign: "center",
-  },
   catchBoxActive: {
     borderColor: Colors.accent,
   },
@@ -858,16 +611,5 @@ const styles = StyleSheet.create({
     color: Colors.white,
     ...Typography.body,
     fontWeight: "bold",
-  },
-  deleteCatchButton: {
-    marginTop: 6,
-    backgroundColor: Colors.danger || "#D9534F",
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  deleteCatchText: {
-    ...Typography.body,
-    color: Colors.white,
   },
 });
