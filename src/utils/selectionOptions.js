@@ -1,5 +1,5 @@
 export const selectionOptions = {
-  weather: ["klar", "bewölkt", "regnerisch", "stürmisch", "neblig", "Schnee"],
+  weather: ["sonnig", "bewölkt", "regnerisch", "stürmisch", "neblig", "Schnee"],
   moon: ["Neumond", "zunehmend", "Vollmond", "abnehmend"],
   wind: [
     "Nord",

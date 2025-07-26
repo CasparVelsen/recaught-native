@@ -20,23 +20,7 @@ import {
 } from "../components/backendHandling/backendHandling";
 import CatchEditModal from "../components/modals/CatchEditModal";
 import InputPicker from "../components/InputPicker";
-
-const selectionOptions = {
-  weather: ["sonnig", "bewölkt", "regnerisch", "windig", "stürmisch", "Schnee"],
-  watercolor: ["klar", "trüb", "leicht trüb"],
-  moon: ["Neumond", "zunehmend", "Vollmond", "abnehmend"],
-  wind: [
-    "Nord",
-    "Nordost",
-    "Ost",
-    "Südost",
-    "Süd",
-    "Südwest",
-    "West",
-    "Nordwest",
-  ],
-  waterlevel: ["niedrig", "normal", "hoch"],
-};
+import { selectionOptions } from "../utils/selectionOptions";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
 
@@ -121,9 +105,9 @@ const CardDetailsScreen = ({
       year: "numeric",
     }).format(date);
   };
-
   const renderTile = (label, value, key) => {
     if (!value && value !== 0 && !isEditing) return null;
+
     const translatedValue = key ? translateValue(key, value) : value;
     const options = selectionOptions[key];
     const isSelectable = isEditing && options;
@@ -134,14 +118,14 @@ const CardDetailsScreen = ({
         {isEditableText ? (
           <TextInput
             style={styles.tileValue}
-            value={formData[key]?.toString() || "Bearbeiten"}
+            value={value?.toString() || ""}
             onChangeText={(text) => handleChange(key, text)}
           />
         ) : isSelectable ? (
           <InputPicker
-            value={formData[key]}
+            value={translatedValue}
             onChange={(v) => handleChange(key, v)}
-            options={options}
+            options={options} // must be an array of strings
             placeholder={"Auswählen"}
             isEditing={isEditing}
             style={styles.tilePicker}
@@ -153,16 +137,6 @@ const CardDetailsScreen = ({
         <Text style={styles.tileLabel}>{label}</Text>
       </View>
     );
-  };
-
-  const fieldLabels = {
-    species: "Art",
-    bait: "Fliege",
-    length: "Länge",
-    weight: "Gewicht",
-    time: "Uhrzeit",
-    location: "Ort",
-    notes: "Notizen",
   };
 
   return (
@@ -314,6 +288,31 @@ const CardDetailsScreen = ({
               </TouchableOpacity>
             </View>
           ))}
+          {isEditing && (
+            <TouchableOpacity
+              style={styles.addCatchButton}
+              onPress={() => {
+                const newCatch = {
+                  species: "",
+                  length: "",
+                  weight: "",
+                  time: "",
+                  bait: "",
+                  notes: "",
+                  taken: false,
+                };
+                setCatchForm(newCatch);
+                setModalState({
+                  key: null,
+                  visible: true,
+                  catchIndex: formData.catches?.length || 0,
+                  isNew: true,
+                });
+              }}
+            >
+              <Text style={styles.addCatchButtonText}>+ Fang hinzufügen</Text>
+            </TouchableOpacity>
+          )}
 
           <Field label="gefangen" value={formData.catches?.length} />
           <Field
@@ -402,10 +401,19 @@ const CardDetailsScreen = ({
             setCatchForm(null);
           }}
           onSave={() => {
-            const updated = [...formData.catches];
-            updated[modalState.catchIndex] = { ...catchForm };
+            const updated = [...(formData.catches || [])];
+            if (modalState.isNew) {
+              updated.push({ ...catchForm });
+            } else {
+              updated[modalState.catchIndex] = { ...catchForm };
+            }
             setFormData((prev) => ({ ...prev, catches: updated }));
-            setModalState({ key: null, visible: false, catchIndex: null });
+            setModalState({
+              key: null,
+              visible: false,
+              catchIndex: null,
+              isNew: false,
+            });
             setCatchForm(null);
           }}
         />
@@ -509,6 +517,7 @@ const styles = StyleSheet.create({
   },
   tileActive: {
     borderColor: Colors.accent,
+    padding: 12,
   },
   tileValue: {
     ...Typography.body,
@@ -620,5 +629,18 @@ const styles = StyleSheet.create({
     color: Colors.white,
     ...Typography.body,
     fontWeight: "bold",
+  },
+  addCatchButton: {
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+  },
+  addCatchButtonText: {
+    color: Colors.secondary,
+    fontWeight: "bold",
+    ...Typography.button,
   },
 });

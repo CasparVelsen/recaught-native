@@ -20,7 +20,14 @@ export default function InputPicker({
         style={[styles.input, isEditing && styles.inputEditing, style]}
         onPress={() => setVisible(true)}
       >
-        <Text style={[styles.inputText, textStyle, value && { color: "#ccc" }]}>
+        <Text
+          style={[
+            styles.inputText,
+            isEditing && styles.inputTextEditing,
+            textStyle,
+            value,
+          ]}
+        >
           {value || placeholder}
         </Text>
       </Pressable>
@@ -50,6 +57,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   inputText: {
-    color: "#bbb",
+    color: "#ccc",
   },
+  inputTextEditing: { color: Colors.primary },
 });
