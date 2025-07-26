@@ -19,6 +19,7 @@ import {
   deleteCardFromBackend,
 } from "../components/backendHandling/backendHandling";
 import CatchEditModal from "../components/modals/CatchEditModal";
+import InputPicker from "../components/InputPicker";
 
 const selectionOptions = {
   weather: ["sonnig", "bewölkt", "regnerisch", "windig", "stürmisch", "Schnee"],
@@ -131,24 +132,27 @@ const CardDetailsScreen = ({
     const isEditableText = isEditing && !options;
 
     return (
-      <TouchableOpacity
-        onPress={() =>
-          isSelectable ? setModalState({ key, visible: true }) : null
-        }
-        activeOpacity={isSelectable ? 0.8 : 1}
-        style={[styles.tile, isEditing && styles.tileActive]}
-      >
+      <View style={[styles.tile, isEditing && styles.tileActive]}>
         {isEditableText ? (
           <TextInput
             style={styles.tileValue}
             value={formData[key]?.toString() || ""}
             onChangeText={(text) => handleChange(key, text)}
           />
+        ) : isSelectable ? (
+          <InputPicker
+            value={formData[key]}
+            onChange={(v) => handleChange(key, v)}
+            options={options}
+            placeholder={`${label} ausw\u00e4hlen`}
+            style={styles.tilePicker}
+            textStyle={styles.tileValue}
+          />
         ) : (
           <Text style={styles.tileValue}>{translatedValue}</Text>
         )}
         <Text style={styles.tileLabel}>{label}</Text>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -216,7 +220,8 @@ const CardDetailsScreen = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.tilesContainer}>
-          {(formData.watertemp ||
+          {(isEditing ||
+            formData.watertemp ||
             formData.watercolor ||
             formData.waterlevel) && (
             <View style={styles.tileGroup}>
@@ -228,7 +233,8 @@ const CardDetailsScreen = ({
               </View>
             </View>
           )}
-          {(formData.weather ||
+          {(isEditing ||
+            formData.weather ||
             formData.airpressure ||
             formData.temperature ||
             formData.moon ||
@@ -508,6 +514,9 @@ const styles = StyleSheet.create({
   tileValue: {
     ...Typography.body,
     color: Colors.primary,
+    marginBottom: 4,
+  },
+  tilePicker: {
     marginBottom: 4,
   },
   tileLabel: {
