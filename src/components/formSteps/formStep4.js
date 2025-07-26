@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { fetchCards } from "../../utils/fetchCards";
 import {
   View,
   Text,
@@ -15,8 +16,9 @@ import TimePickerInput from "../TimePickerInput";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
+import { getUniqueBaits } from "../../utils/stats";
 
-export default function Step4({ data, onChange }) {
+export default function Step4({ data, onChange, token }) {
   const [catchForm, setCatchForm] = useState({
     species: "",
     length: "",
@@ -31,6 +33,20 @@ export default function Step4({ data, onChange }) {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
+  const [baitModalOpen, setBaitModalOpen] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [baits, setBaits] = useState([]);
+  const [customBait, setCustomBait] = useState("");
+  const [showCustomBaitInput, setShowCustomBaitInput] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const loaded = await fetchCards(token);
+      setCards(loaded);
+      setBaits(getUniqueBaits(loaded));
+    };
+    load();
+  }, [token]);
 
   const openModal = () => {
     setModalOpen(true);
@@ -101,11 +117,21 @@ export default function Step4({ data, onChange }) {
         </View>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Fliege</Text>
-          <TextInput
-            style={styles.input}
-            value={catchForm.bait}
-            onChangeText={(v) => setCatchForm((prev) => ({ ...prev, bait: v }))}
-          />
+          <Pressable
+            style={styles.selectInput}
+            onPress={() => {
+              setBaitModalOpen(true);
+              Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 250,
+                useNativeDriver: true,
+              }).start();
+            }}
+          >
+            <Text style={styles.selectText}>
+              {catchForm.bait || "Fliege auswählen"}
+            </Text>
+          </Pressable>
         </View>
       </View>
 
@@ -285,6 +311,77 @@ export default function Step4({ data, onChange }) {
                     setCustomSpecies("");
                     setShowCustomInput(false);
                     closeModal();
+                  }}
+                >
+                  <Text style={styles.addButtonText}>Hinzufügen</Text>
+                </Pressable>
+              </View>
+            )}
+          </Animated.View>
+        </Modal>
+      )}
+
+      {/* Bait Selection Modal */}
+      {baitModalOpen && (
+        <Modal transparent animationType="none" visible={baitModalOpen}>
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setBaitModalOpen(false)}
+          />
+          <Animated.View
+            style={[
+              styles.modalContent,
+              { transform: [{ translateY: slideAnim }] },
+            ]}
+          >
+            {baits.length === 0 ? (
+              <Text style={[styles.modalItemText, { textAlign: "center" }]}>
+                Lade Köder...
+              </Text>
+            ) : (
+              <FlatList
+                data={baits}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.modalItem}
+                    onPress={() => {
+                      setCatchForm((prev) => ({ ...prev, bait: item }));
+                      setBaitModalOpen(false);
+                    }}
+                  >
+                    <Text style={styles.modalItemText}>{item}</Text>
+                  </Pressable>
+                )}
+              />
+            )}
+            <Pressable
+              style={styles.modalItem}
+              onPress={() => setShowCustomBaitInput(true)}
+            >
+              <Text style={[styles.modalItemText, { color: Colors.accent }]}>
+                + Neue Fliege hinzufügen
+              </Text>
+            </Pressable>
+            {showCustomBaitInput && (
+              <View style={{ padding: 16 }}>
+                <TextInput
+                  placeholder="Neue Fliege eingeben"
+                  value={customBait}
+                  onChangeText={setCustomBait}
+                  style={styles.input}
+                />
+                <Pressable
+                  style={[styles.addButton, { marginTop: 10 }]}
+                  onPress={() => {
+                    if (!customBait.trim()) return;
+                    setCatchForm((prev) => ({
+                      ...prev,
+                      bait: customBait.trim(),
+                    }));
+                    setCustomBait("");
+                    setShowCustomBaitInput(false);
+                    setBaitModalOpen(false);
                   }}
                 >
                   <Text style={styles.addButtonText}>Hinzufügen</Text>

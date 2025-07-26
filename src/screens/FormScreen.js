@@ -92,7 +92,7 @@ export default function FormScreen({ token }) {
       case 3:
         return <Step3 data={form} onChange={handleChange} />;
       case 4:
-        return <Step4 data={form} onChange={handleChange} />;
+        return <Step4 data={form} token={token} onChange={handleChange} />;
       case 5:
         return (
           <Step5
