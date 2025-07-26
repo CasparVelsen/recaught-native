@@ -16,7 +16,6 @@ import InputPicker from "../InputPicker";
 const API_BASE_URL = "http://10.116.131.241:3000"; // Stelle sicher, dass dies die richtige IP-Adresse des Servers ist
 
 export default function Step2({ data, onChange }) {
-
   // Funktion, um Wetterdaten vom Server zu holen
   const fetchWeatherData = async () => {
     try {
@@ -30,8 +29,6 @@ export default function Step2({ data, onChange }) {
       // Geolocation abrufen
       const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-
-      console.log("Standortdaten:", { latitude, longitude });
 
       // API-Anfrage an den Backend-Server
       const response = await fetch(`${API_BASE_URL}/api/external-weather`, {
@@ -142,7 +139,6 @@ export default function Step2({ data, onChange }) {
           Aktuelle Wetterdaten abrufen
         </Text>
       </Pressable>
-
     </View>
   );
 }
