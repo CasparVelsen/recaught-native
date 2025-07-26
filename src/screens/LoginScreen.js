@@ -13,8 +13,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../assets/colors/Colors";
 import Typography from "../../assets/fonts/Typography";
-
-const API_BASE_URL = "http://10.116.131.241:3000";
+import { API_BASE_URL } from "../config";
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [credentials, setCredentials] = useState({

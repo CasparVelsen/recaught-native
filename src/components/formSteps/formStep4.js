@@ -16,7 +16,7 @@ import TimePickerInput from "../TimePickerInput";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
-import { getUniqueBaits } from "../../utils/stats";
+import { getUniqueBaits } from "../../utils/flyBoxData";
 
 export default function Step4({ data, onChange, token }) {
   const [catchForm, setCatchForm] = useState({

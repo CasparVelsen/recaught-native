@@ -31,6 +31,7 @@ export default {
     plugins: ["expo-font"],
     extra: {
       openWeatherApiKey: process.env.OPENWEATHER_API_KEY,
+      apiBaseUrl: process.env.API_BASE_URL,
     },
     eas: {
       projectId: "b68ae2f0-aeb2-4461-bca7-aec6920ab091", // Füge dies hinzu

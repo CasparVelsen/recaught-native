@@ -12,8 +12,7 @@ import Colors from "../../../assets/colors/Colors"; // Importiere deine Farben
 import Typography from "../../../assets/fonts/Typography"; // Importiere deine Typografie
 import { selectionOptions } from "../../utils/selectionOptions"; // Dein Auswahloptionen-Modul
 import InputPicker from "../InputPicker";
-
-const API_BASE_URL = "http://10.116.131.241:3000"; // Stelle sicher, dass dies die richtige IP-Adresse des Servers ist
+import { API_BASE_URL } from "../../config";
 
 export default function Step2({ data, onChange }) {
   // Funktion, um Wetterdaten vom Server zu holen
