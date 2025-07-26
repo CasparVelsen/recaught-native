@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     backgroundColor: "#fff",
-    marginBottom: 20,
   },
   inputEditing: {
     borderWidth: 0,

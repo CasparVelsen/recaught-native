@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   label: {
     ...Typography.body,

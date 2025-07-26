@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     flex: 1,
+    marginBottom: 20,
   },
 
   label: {
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 14,
-    marginBottom: 20,
   },
   button: {
     backgroundColor: Colors.primary,
