@@ -9,6 +9,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import SignupScreen from "./src/screens/SignupScreen";
 import BottomNav from "./src/navigation/BottomNav";
 import CardDetailsScreen from "./src/screens/CardDetailsScreen";
+import CatchesDetailsScreen from "./src/screens/CatchesDetailsScreen";
 import FormScreen from "./src/screens/FormScreen";
 import Colors from "./assets/colors/Colors";
 
@@ -82,6 +83,11 @@ export default function App() {
                     />
                   )}
                 </Stack.Screen>
+
+                <Stack.Screen
+                  name="CatchesDetails"
+                  component={CatchesDetailsScreen}
+                />
               </>
             ) : (
               <>

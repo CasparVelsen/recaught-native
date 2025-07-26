@@ -15,6 +15,8 @@ import LineStats from "../components/stats/LineStats";
 import BarStats from "../components/stats/BarStats";
 import { getEnvironmentStats } from "../utils/stats";
 import StatsListModal from "../components/modals/StatsListModal";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
 const API_BASE_URL = "http://10.116.131.241:3000";
 
@@ -95,6 +97,14 @@ const StatsScreen = ({ token, profile }) => {
 
   const handleModalDismiss = () => {
     setModalType(null);
+  };
+
+  const navigation = useNavigation();
+
+  console.log(cards);
+
+  const handleDetailsPress = () => {
+    navigation.navigate("CatchesDetails", { cards: cards });
   };
 
   // Vorschau: Top 6 Items
@@ -206,6 +216,15 @@ const StatsScreen = ({ token, profile }) => {
             </View>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.bestButton}
+          activeOpacity={0.7}
+          onPress={handleDetailsPress}
+        >
+          <Text style={styles.bestText}>Fangübersicht</Text>
+          <Ionicons name="arrow-forward" size={18} color={Colors.accent} />
+        </TouchableOpacity>
 
         {stats && <LineStats stats={stats} />}
         {stats && <BarStats stats={stats} />}
@@ -340,5 +359,16 @@ const styles = StyleSheet.create({
   empty: {
     fontStyle: "italic",
     color: "#888",
+  },
+  bestButton: {
+    alignSelf: "flex-end",
+    marginRight: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  bestText: {
+    color: Colors.accent,
+    ...Typography.button,
   },
 });
