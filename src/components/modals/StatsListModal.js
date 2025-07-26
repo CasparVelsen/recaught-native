@@ -14,9 +14,13 @@ import Typography from "../../../assets/fonts/Typography";
 export default function StatsListModal({ visible, title, data, onClose }) {
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const [show, setShow] = useState(false);
+  const [renderedTitle, setRenderedTitle] = useState("");
+  const [renderedData, setRenderedData] = useState([]);
 
   useEffect(() => {
     if (visible) {
+      setRenderedTitle(title);
+      setRenderedData(data);
       setShow(true);
       Animated.timing(overlayOpacity, {
         toValue: 1,
@@ -28,9 +32,13 @@ export default function StatsListModal({ visible, title, data, onClose }) {
         toValue: 0,
         duration: 300,
         useNativeDriver: true,
-      }).start(() => setShow(false));
+      }).start(() => {
+        setShow(false);
+        setRenderedTitle("");
+        setRenderedData([]);
+      });
     }
-  }, [visible]);
+  }, [visible, title, data]);
 
   if (!show) return null;
 
@@ -45,15 +53,41 @@ export default function StatsListModal({ visible, title, data, onClose }) {
   };
 
   return (
-    <Modal visible={show} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={show}
+      transparent
+      animationType="none" // wir animieren selbst
+      onRequestClose={onClose}
+    >
       <View style={styles.modalContainer}>
-        <Animated.View style={[styles.modalOverlay, { opacity: overlayOpacity }]}> 
+        <Animated.View
+          style={[styles.modalOverlay, { opacity: overlayOpacity }]}
+        >
           <Pressable style={{ flex: 1 }} onPress={onClose} />
         </Animated.View>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{title}</Text>
-          <FlatList data={data} keyExtractor={(item) => item[0]} renderItem={renderItem} />
-        </View>
+        <Animated.View
+          style={[
+            styles.modalContent,
+            {
+              opacity: overlayOpacity,
+              transform: [
+                {
+                  scale: overlayOpacity.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.95, 1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text style={styles.modalTitle}>{renderedTitle}</Text>
+          <FlatList
+            data={renderedData}
+            keyExtractor={(item) => item[0]}
+            renderItem={renderItem}
+          />
+        </Animated.View>
       </View>
     </Modal>
   );

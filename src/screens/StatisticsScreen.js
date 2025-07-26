@@ -91,6 +91,9 @@ const StatsScreen = ({ token, profile }) => {
 
   const closeModal = () => {
     setModalVisible(false);
+  };
+
+  const handleModalDismiss = () => {
     setModalType(null);
   };
 
@@ -213,6 +216,7 @@ const StatsScreen = ({ token, profile }) => {
         title={modalTitle}
         data={modalData}
         onClose={closeModal}
+        onDismiss={handleModalDismiss}
       />
     </SafeAreaView>
   );
