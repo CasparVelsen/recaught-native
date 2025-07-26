@@ -101,10 +101,8 @@ const StatsScreen = ({ token, profile }) => {
 
   const navigation = useNavigation();
 
-  console.log(cards);
-
   const handleDetailsPress = () => {
-    navigation.navigate("CatchesDetails", { cards: cards });
+    navigation.navigate("CatchesDetails", { cards: filteredCards });
   };
 
   // Vorschau: Top 6 Items
