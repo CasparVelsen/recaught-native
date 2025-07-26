@@ -58,7 +58,6 @@ const CardDetailsScreen = ({
   });
   const [catchForm, setCatchForm] = useState(null);
 
-
   const toggleExpand = (index) => {
     setExpandedIndex((prev) => (prev === index ? null : index));
   };
@@ -123,7 +122,6 @@ const CardDetailsScreen = ({
     }).format(date);
   };
 
-
   const renderTile = (label, value, key) => {
     if (!value && value !== 0 && !isEditing) return null;
     const translatedValue = key ? translateValue(key, value) : value;
@@ -144,7 +142,8 @@ const CardDetailsScreen = ({
             value={formData[key]}
             onChange={(v) => handleChange(key, v)}
             options={options}
-            placeholder={`${label} ausw\u00e4hlen`}
+            placeholder={"Auswählen"}
+            isEditing={isEditing}
             style={styles.tilePicker}
             textStyle={styles.tileValue}
           />

@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray,
   },
   optionText: {
-    ...Typography.h3,
+    ...Typography.body,
     textAlign: "center",
     color: Colors.primary,
   },

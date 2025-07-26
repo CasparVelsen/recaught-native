@@ -10,12 +10,16 @@ export default function InputPicker({
   placeholder = "Ausw\u00e4hlen",
   style,
   textStyle,
+  isEditing = false, // 🆕 default false
 }) {
   const [visible, setVisible] = useState(false);
 
   return (
     <View>
-      <Pressable style={[styles.input, style]} onPress={() => setVisible(true)}>
+      <Pressable
+        style={[styles.input, isEditing && styles.inputEditing, style]}
+        onPress={() => setVisible(true)}
+      >
         <Text
           style={[
             styles.inputText,
@@ -46,6 +50,10 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
     marginBottom: 20,
+  },
+  inputEditing: {
+    borderWidth: 0,
+    padding: 0,
   },
   inputText: {
     color: "#bbb",
