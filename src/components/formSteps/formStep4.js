@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     backgroundColor: "#fff",
-    color: "#ccc",
+    color: "#bbb",
   },
   selectInput: {
     borderWidth: 1,

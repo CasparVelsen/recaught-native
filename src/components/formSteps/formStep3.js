@@ -1,18 +1,12 @@
 // components/formSteps/formStep3.js
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
 import InputPicker from "../InputPicker";
 
 export default function Step3({ data, onChange }) {
-
   return (
     <View style={styles.wrapper}>
       <Text style={styles.title}>Gewässerzustand:</Text>
@@ -61,7 +55,6 @@ export default function Step3({ data, onChange }) {
           placeholder="Wasserstand auswählen"
         />
       </View>
-
     </View>
   );
 }
@@ -92,7 +85,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: Colors.gray,
-    color: "#ccc",
+    color: "#bbb",
     borderRadius: 8,
     padding: 10,
     backgroundColor: "#fff",

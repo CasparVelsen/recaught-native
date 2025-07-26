@@ -20,13 +20,7 @@ export default function InputPicker({
         style={[styles.input, isEditing && styles.inputEditing, style]}
         onPress={() => setVisible(true)}
       >
-        <Text
-          style={[
-            styles.inputText,
-            textStyle,
-            value && { color: Colors.primary },
-          ]}
-        >
+        <Text style={[styles.inputText, textStyle, value && { color: "#ccc" }]}>
           {value || placeholder}
         </Text>
       </Pressable>
