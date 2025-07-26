@@ -1,46 +1,17 @@
 // components/formSteps/formStep3.js
-import React, { useState, useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
   TextInput,
-  Pressable,
-  Modal,
-  FlatList,
-  Animated,
   StyleSheet,
 } from "react-native";
 import Colors from "../../../assets/colors/Colors";
 import Typography from "../../../assets/fonts/Typography";
 import { selectionOptions } from "../../utils/selectionOptions";
+import InputPicker from "../InputPicker";
 
 export default function Step3({ data, onChange }) {
-  const [modalState, setModalState] = useState({ key: null, visible: false });
-  const slideAnim = useRef(new Animated.Value(300)).current;
-
-  const openModal = (key) => {
-    setModalState({ key, visible: true });
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeModal = () => {
-    Animated.timing(slideAnim, {
-      toValue: 300,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setModalState({ key: null, visible: false });
-    });
-  };
-
-  const handleSelection = (value) => {
-    onChange({ [modalState.key]: value });
-    closeModal();
-  };
 
   return (
     <View style={styles.wrapper}>
@@ -72,54 +43,25 @@ export default function Step3({ data, onChange }) {
       {/* Wasserfarbe */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Wasserfarbe</Text>
-        <Pressable
-          style={styles.selectInput}
-          onPress={() => openModal("watercolor")}
-        >
-          <Text style={styles.selectText}>
-            {data.watercolor || "Wasserfarbe auswählen"}
-          </Text>
-        </Pressable>
+        <InputPicker
+          value={data.watercolor}
+          onChange={(v) => onChange({ watercolor: v })}
+          options={selectionOptions.watercolor}
+          placeholder="Wasserfarbe auswählen"
+        />
       </View>
 
       {/* Wasserstand */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Wasserstand</Text>
-        <Pressable
-          style={styles.selectInput}
-          onPress={() => openModal("waterlevel")}
-        >
-          <Text style={styles.selectText}>
-            {data.waterlevel || "Wasserstand auswählen"}
-          </Text>
-        </Pressable>
+        <InputPicker
+          value={data.waterlevel}
+          onChange={(v) => onChange({ waterlevel: v })}
+          options={selectionOptions.waterlevel}
+          placeholder="Wasserstand auswählen"
+        />
       </View>
 
-      {/* Modal */}
-      {modalState.visible && (
-        <Modal transparent animationType="none" visible={modalState.visible}>
-          <Pressable style={styles.modalOverlay} onPress={closeModal} />
-          <Animated.View
-            style={[
-              styles.modalContent,
-              { transform: [{ translateY: slideAnim }] },
-            ]}
-          >
-            <FlatList
-              data={selectionOptions[modalState.key]}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={styles.modalItem}
-                  onPress={() => handleSelection(item)}
-                >
-                  <Text style={styles.modalItemText}>{item}</Text>
-                </Pressable>
-              )}
-            />
-          </Animated.View>
-        </Modal>
-      )}
     </View>
   );
 }
@@ -155,41 +97,5 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
     fontSize: 14,
-  },
-  selectInput: {
-    borderWidth: 1,
-    borderColor: Colors.gray,
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: "#fff",
-  },
-  selectText: {
-    color: "#bbb",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  modalContent: {
-    maxHeight: "50%",
-    backgroundColor: "#fff",
-    paddingVertical: 12,
-    paddingBottom: 30,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  modalItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  modalItemText: {
-    fontSize: 16,
-    color: Colors.primary,
-    textAlign: "center",
   },
 });
